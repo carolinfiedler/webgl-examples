@@ -1,0 +1,152 @@
+
+* {
+    border-radius: 0 !important;
+}
+
+body {
+    font-family: 'Source Sans Pro', sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #1c75bc;
+    font-weight: 300;
+}
+h4, h5, h6 {
+    text-transform: uppercase;
+}
+
+pre, code {
+    font-family: 'Source Code Pro';
+}
+
+header, footer {
+    margin-top: 6rem;
+}
+
+section {
+    margin-bottom: 2rem;
+}
+
+
+
+nav.navbar img {
+    height: 1.5rem;
+    width: auto;
+}
+nav ul.navbar-nav {
+    flex-direction: row;
+}
+nav ul#nav.navbar-nav li.nav-item a.nav-link {
+    padding-left: 1rem;
+    padding-right: 0;
+}
+
+ul.features {
+    padding-left: 0;
+    display: inline-block;
+    margin-bottom: 0;
+}
+ul.features li {
+    display: inline;
+    float: left;
+}
+ul.features li:after { 
+    content: "\2009\2014\2009"; 
+}
+ul.features li:first-child:after { 
+    content: "\2002\007C\2002"; 
+}
+ul.features li:last-child:after { 
+    content: none; 
+}
+
+@media screen and (min-width: 960px) {
+    .card-columns {
+        column-count: 3;
+    }
+}
+@media screen and (max-width: 960px) and (min-width: 540px) {
+    .card-columns {
+        column-count: 2;
+    }
+}
+
+.btn-clipboard-parent {
+    position: relative;
+}
+
+.btn-clipboard {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    z-index: 10;
+    display: block;
+    padding: .25rem .5rem;
+    cursor: pointer;
+    background-color: transparent;
+    border-radius: .25rem;
+}
+
+
+#test-canvas:fullscreen  {
+    width: 100%!important;
+    height: 100%!important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#test-canvas:-moz-full-screen {
+    width: 100%!important;
+    height: 100%!important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#test-canvas:-ms-full-screen {
+    width: 100%!important;
+    height: 100%!important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#test-canvas:-webkit-full-screen {
+    width: 100%!important;
+    height: 100%!important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Copyright (c) 2016 Tim Holman - http://tholman.com - https://github.com/tholman/github-corners */
+/* 
+.github-corner:hover .octo-arm{
+    animation:octocat-wave 560ms ease-in-out
+}
+@keyframes octocat-wave{
+    0%,100%{ transform:rotate(  0deg) }
+    20%,60%{ transform:rotate(-25deg) }
+    40%,80%{ transform:rotate( 10deg) }
+}
+@media (max-width:500px){
+    .github-corner:hover .octo-arm{ animation:none }
+    .github-corner .octo-arm{ animation:octocat-wave 560ms ease-in-out }
+}
+
+.github-corner {
+    color: #343a40;
+    fill: #e7e8ea;
+    position: absolute;
+    border: none;
+    right: 15px;
+} */

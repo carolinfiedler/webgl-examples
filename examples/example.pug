@@ -1,0 +1,32 @@
+mixin example(source, title, author, caption)
+  doctype html
+  html(lang = 'en')
+    include partial/head.pug
+    body.bg-light
+  
+  
+      include partial/navbar.pug
+  
+  
+      section.container
+        header.jumbatron
+          img(src = 'img/webgl-operate-logo.svg' alt = 'webgl-operate logo').mb-2.w-50.d-none.d-md-block
+          img(src = 'img/webgl-operate-logo.svg' alt = 'webgl-operate logo').mb-2.d-block.d-md-none
+          p.lead webgl-operate (or gloperate for WebGL) is a TypeScript based WebGL rendering framework.
+  
+  
+      section.container
+        div.row
+          div.col
+            - var id = 'example-canvas'
+            include partial/canvas.pug
+  
+  
+      section.container
+        div.row
+          div.col
+            p #{caption}
+  
+  
+      include partial/foot.pug
+  

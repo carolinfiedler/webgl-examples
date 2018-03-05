@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "lib": [
+            "dom",
+            "es2015"
+        ],
+        "outDir": "dist",
+        "sourceMap": true,
+        "declaration": false,
+        "alwaysStrict": true,
+        "noImplicitAny": true,
+        "noUnusedParameters": false,
+        "noUnusedLocals": false,
+        "strictNullChecks": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "allowSyntheticDefaultImports": false,
+        "skipLibCheck": true
+    },
+    "include": [
+        "source"
+    ]
+}

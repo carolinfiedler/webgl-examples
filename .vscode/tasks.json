@@ -1,0 +1,52 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "0.1.0",
+    "command": "npm",
+    "isShellCommand": true,
+    "suppressTaskName": true,
+    "showOutput": "always",
+    "echoCommand": true,
+    "tasks": [
+        {
+            "taskName": "build",
+            "isBuildCommand": true,
+            "args": [
+                "run-script",
+                "build"
+            ]
+        },
+        {
+            "taskName": "build (watch)",
+            "isBuildCommand": true,
+            "args": [
+                "run-script",
+                "build-watch"
+            ]
+        },
+        {
+            "taskName": "check",
+            "isTestCommand": true,
+            "args": [
+                "run-script",
+                "check"
+            ]
+        },
+        {
+            "taskName": "examples",
+            "isBuildCommand": true,
+            "args": [
+                "run-script",
+                "example"
+            ]
+        },
+        {
+            "taskName": "examples (watch)",
+            "isBuildCommand": true,
+            "args": [
+                "run-script",
+                "example-watch"
+            ]
+        },
+    ]
+}

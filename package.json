@@ -1,0 +1,58 @@
+{
+    "name": "webgl-operate-examples",
+    "version": "0.1.6",
+    "license": "MIT",
+    "description": "TypeScript based WebGL examples using webgl-operate.",
+    "author": "CG Internals",
+    "homepage": "https://webgl-operate.org",
+    "bugs": {
+        "email": "contact@cginternals.com",
+        "url": "https://github.com/cginternals/webgl-operate-examples/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cginternals/webgl-operate-examples.git"
+    },
+    "contributors": [
+        {
+            "name": "Daniel Limberger",
+            "email": "daniel.limberger@cginternals.com"
+        }
+    ],
+    "devDependencies": {
+        "@types/gl-matrix": "~2.3.2",
+        "gl-matrix": "~2.3.2",
+        "glob": "~7.1.2",
+        "pug": "~2.0.0-rc.4",
+        "source-map-support": "~0.5.3",
+        "ts-loader": "~3.5.0",
+        "tslint": "~5.9.1",
+        "typescript": "~2.7.2",
+        "webpack": "~3.11.0",
+        "webpack-glsl-loader": "~1.0.1",
+        "webpack-sources": "~1.1.0"
+    },
+    "dependencies": {
+        "rxjs": "^5.5.6",
+        "webgl-operate": "0.1.6"
+    },
+    "peerDependencies": {
+        "rxjs": "^5.5.6"
+    },
+    "scripts": {
+        "build": "webpack",
+        "check": "tslint --project tsconfig.json --force --format stylish --config tslint.json",
+        "example": "node pugconfig.js",
+        "example-watch": "node pugconfig.js --watch"
+    },
+    "keywords": [
+        "webgl",
+        "rendering",
+        "canvas",
+        "engine",
+        "2d",
+        "3d",
+        "multiframe",
+        "examples"
+    ]
+}
