@@ -11,7 +11,7 @@ const glob = require("glob");
 const path = require('path');
 const pug = require('pug');
 
-const baseDir = './examples';
+const baseDir = './website';
 const distDir = './dist';
 
 const assets = [

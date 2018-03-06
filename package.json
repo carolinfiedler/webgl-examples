@@ -2,7 +2,7 @@
     "name": "webgl-operate-examples",
     "version": "0.1.6",
     "license": "MIT",
-    "description": "TypeScript based WebGL examples using webgl-operate.",
+    "description": "WebGL examples using TypeScript and webgl-operate.",
     "author": "CG Internals",
     "homepage": "https://webgl-operate.org",
     "bugs": {
@@ -41,9 +41,10 @@
     },
     "scripts": {
         "build": "webpack",
+        "build-watch": "webpack --watch",
         "check": "tslint --project tsconfig.json --force --format stylish --config tslint.json",
-        "example": "node pugconfig.js",
-        "example-watch": "node pugconfig.js --watch"
+        "website": "node pugconfig.js",
+        "website-watch": "node pugconfig.js --watch"
     },
     "keywords": [
         "webgl",
