@@ -7,7 +7,7 @@ import {
 import { assert } from '../auxiliaries';
 
 
-export class TestRenderer extends AbstractRenderer {
+export class SkyTriangle extends AbstractRenderer {
 
     protected _extensions = false;
     protected _program: Program;
