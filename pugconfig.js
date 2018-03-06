@@ -11,33 +11,30 @@ const glob = require("glob");
 const path = require('path');
 const pug = require('pug');
 
-
 const distDir = './dist';
 const websiteDir = './website';
 
-
 const assets = [
+    ['./', distDir, ['examples.json']],
     ['./data', distDir + '/data', ['*']],
     [websiteDir, distDir, ['css/*.css', 'js/*.js', 'img/*.{svg,png}', 'fonts/*', '*.{svg,png,ico,xml,json}']],
     ['./node_modules/webgl-operate/dist', distDir + '/js', ['webgl-operate.{js,js.map}']]];
 
-const entries = [
-    'test-renderer.pug',
-    'sky-triangle.pug',
-];
-
 const copy = require('./copy.js');
+
+const examples = require('./examples.json').examples;
+
 
 var build_pending = false;
 function build() {
 
     assets.forEach((asset) => copy(asset[0], asset[1], asset[2]));
 
-    entries.forEach((entry) => {
-        const src = path.join(websiteDir, entry);
-        const dst = path.join(distDir, path.basename(entry, path.extname(entry)) + '.html');
+    examples.forEach((example) => {
+        const src = path.join(websiteDir, example + '.pug');
+        const dst = path.join(distDir, example + '.html');
         if (!fs.existsSync(src)) {
-            console.log('skipped:', entry);
+            console.log('skipped:', example);
             return;
         }
         const html = pug.renderFile(src);
