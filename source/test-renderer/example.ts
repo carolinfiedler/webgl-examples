@@ -1,11 +1,12 @@
 
-import { Canvas, Context } from 'webgl-operate';
+
+declare var gloperate: any;
 
 import { TestRenderer } from './testrenderer';
 
 
 function onload() {
-    const canvas = new Canvas('example-canvas');
+    const canvas = new gloperate.Canvas('example-canvas');
     const context = canvas.context;
     const renderer = new TestRenderer();
     canvas.renderer = renderer;

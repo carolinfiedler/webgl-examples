@@ -1,11 +1,11 @@
 
-import { Canvas, Context } from 'webgl-operate';
+declare var gloperate: any;
 
 import { SkyTriangle } from './skytriangle';
 
 
 function onload() {
-    const canvas = new Canvas('example-canvas');
+    const canvas = new gloperate.Canvas('example-canvas');
     const context = canvas.context;
     const renderer = new SkyTriangle();
     canvas.renderer = renderer;

@@ -7,6 +7,9 @@ module.exports = {
 
     cache: true,
     devtool: 'source-map',
+    externals: {
+        'webgl-operate': 'webgl-operate'
+    },
     entry: {
         'sky-triangle': ['require.ts', 'sky-triangle/example.ts'],
         'test-renderer': ['require.ts', 'test-renderer/example.ts']
@@ -14,9 +17,8 @@ module.exports = {
     output: {
         path: __dirname + '/dist',
         filename: '[name].js',
-        library: 'glexamples',
-        libraryTarget: 'umd'
-
+        libraryTarget: 'umd',
+        umdNamedDefine: true
     },
     resolve: {
         modules: [__dirname + '/node_modules', __dirname + '/source'],
@@ -34,5 +36,5 @@ module.exports = {
                 test: /\.(glsl|vert|frag)$/,
                 use: { loader: 'webpack-glsl-loader' },
             }]
-    },
+    }
 };
