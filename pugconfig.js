@@ -11,17 +11,19 @@ const glob = require("glob");
 const path = require('path');
 const pug = require('pug');
 
-const baseDir = './website';
+
 const distDir = './dist';
+const websiteDir = './website';
+
 
 const assets = [
-    'css/*.css',
-    'js/*.js',
-    'img/*.{svg,png}',
-    'fonts/*',
-    '*.{svg,png,ico,xml,json}'];
+    ['./data', distDir + '/data', ['*']],
+    [websiteDir, distDir, ['css/*.css', 'js/*.js', 'img/*.{svg,png}', 'fonts/*', '*.{svg,png,ico,xml,json}']],
+    ['./node_modules/webgl-operate/dist', distDir + '/js', ['webgl-operate.{js,js.map}']]];
+
 const entries = [
-    'test-renderer.pug'
+    'test-renderer.pug',
+    'sky-triangle.pug',
 ];
 
 const copy = require('./copy.js');
@@ -29,11 +31,10 @@ const copy = require('./copy.js');
 var build_pending = false;
 function build() {
 
-    copy('./node_modules/webgl-operate/dist', distDir + '/js', ['webgl-operate.{js,js.map}']);
-    copy(baseDir, distDir, assets);
+    assets.forEach((asset) => copy(asset[0], asset[1], asset[2]));
 
     entries.forEach((entry) => {
-        const src = path.join(baseDir, entry);
+        const src = path.join(websiteDir, entry);
         const dst = path.join(distDir, path.basename(entry, path.extname(entry)) + '.html');
         if (!fs.existsSync(src)) {
             console.log('skipped:', entry);
@@ -51,7 +52,7 @@ function build() {
 build(); // trigger initial build
 
 if (watch) {
-    fs.watch(baseDir, { recursive: true }, function () {
+    fs.watch(websiteDir, { recursive: true }, function () {
         if (build_pending) {
             return;
         }

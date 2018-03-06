@@ -1,8 +1,23 @@
-mixin example(source, author, title, caption)
-  div(id = source).card.my-2
-    img(src = 'https://picsum.photos/300/200/?blur&random&' + source).card-img-top
-    div.card-body
-      h4.card-title #{title}
-      p.card-text #{caption}
-    div.card-footer.text-right
-      small.text-muted by #{author}
+mixin begin_example(title, author, caption)
+  doctype html
+  html(lang = 'en')
+    include head.pug
+    body.bg-light
+  
+      include navbar.pug
+  
+      section.container
+        header.jumbatron
+          h1 #{title}
+          p.lead #{caption}
+  
+      section.container
+        - var id = 'example-canvas'
+        include canvas.pug
+
+        p.text-right by #{author}, featuring #[a(href = 'https://github.com/cginternals/webgl-operate') webgl-operate].
+
+
+mixin end_example(source)
+  script(src = source)
+  include foot.pug

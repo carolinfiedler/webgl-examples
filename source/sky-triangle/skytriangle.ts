@@ -43,10 +43,10 @@ export class SkyTriangle extends AbstractRenderer {
 
         if (!this._program.initialized) {
 
-            const vert = new Shader(this.context, gl.VERTEX_SHADER, 'testrenderer.vert');
-            vert.initialize(require('./testrenderer.vert'));
-            const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'testrenderer.frag');
-            frag.initialize(require('./testrenderer.frag'));
+            const vert = new Shader(this.context, gl.VERTEX_SHADER, 'skytriangle.vert');
+            vert.initialize(require('./skytriangle.vert'));
+            const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'skytriangle.frag');
+            frag.initialize(require('./skytriangle.frag'));
 
             this._program.initialize([vert, frag]);
             this._aVertex = this._program.attribute('a_vertex', 0);

@@ -1,3 +1,0 @@
-# Sky Triangle
-
-Example Template
