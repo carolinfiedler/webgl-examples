@@ -2,7 +2,7 @@
 
 WebGL examples using TypeScript and [webgl-operate](https://webgl-operate.org).
 
-#### How to Create a New Example
+#### How to Setup a New Example
 
 In order to setup a new example, let's say `new-renderer`, the following steps are recommended:
 * Copy and paste the `source/test-renderer` directory which is intended as template for examples.
