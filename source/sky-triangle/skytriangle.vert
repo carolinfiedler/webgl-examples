@@ -4,23 +4,18 @@ precision lowp float;
 @import ../shaders/facade.vert;
 
 
-#if __VERSION__ == 100
-    attribute vec2 a_vertex;
-#else 
-    layout(location = 0) in vec2 a_vertex;
-#endif
+uniform mat4 inverseViewProjection;
 
-uniform vec2 u_ndcOffset;
+in vec2 in_vertex;
 
-varying vec2 v_uv;
+out vec2 v_uv;
+out vec4 v_ray;
 
-
-void main(void)
+void main()
 {
-    v_uv = a_vertex.xy * 0.5 + 0.5;
+    gl_Position = vec4(in_vertex, -1.0, 1.0);
 
-    vec4 vertex = vec4(a_vertex, 0.0, 1.0);
-    vertex.xy = u_ndcOffset * vec2(vertex.w) + vertex.xy;
-
-    gl_Position = vertex;
+    v_uv = in_vertex.xy;
+    
+    v_ray =  inverseViewProjection * vec4(in_vertex, -1.0, 1.0);
 }

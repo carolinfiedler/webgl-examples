@@ -1,13 +1,14 @@
 
 declare var gloperate: any;
 
+import { Skybox } from './skybox';
 import { SkyTriangle } from './skytriangle';
 
 
 function onload() {
     const canvas = new gloperate.Canvas('example-canvas');
     const context = canvas.context;
-    const renderer = new SkyTriangle();
+    const renderer = new Skybox();
     canvas.renderer = renderer;
 
     // export variables

@@ -7,9 +7,6 @@ module.exports = {
 
     cache: true,
     devtool: 'source-map',
-    externals: {
-        'webgl-operate': 'webgl-operate'
-    },
     entry: {
         'sky-triangle': ['require.ts', 'sky-triangle/example.ts'],
         'test-renderer': ['require.ts', 'test-renderer/example.ts']

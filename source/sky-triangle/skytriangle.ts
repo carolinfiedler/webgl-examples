@@ -1,32 +1,29 @@
 
-/**
- * This is probably not the best solution but it declares an gloperate object of type an to soothe the typescript
- * compiler. Then the actual declarations are imported into a temporary namespace and then exported as gloperate.
- */
-declare var gloperate: any;
-import * as gloperate_peer from 'webgl-operate';
-export import gloperate = gloperate_peer;
-
-
 import { assert } from '../auxiliaries';
 
+import {
+    AbstractRenderer, BlitPass, Camera, DefaultFramebuffer, Framebuffer, NdcFillingTriangle, Program, Renderbuffer,
+    Shader, Texture2,
+} from 'webgl-operate';
 
-export class SkyTriangle extends gloperate.AbstractRenderer {
+
+export class SkyTriangle extends AbstractRenderer {
 
     protected _extensions = false;
-    protected _program: gloperate.Program;
 
-    protected _ndcOffsetKernel: gloperate.AntiAliasingKernel;
-    protected _uNdcOffset: WebGLUniformLocation;
-    protected _ndcTriangle: gloperate.NdcFillingTriangle;
+    protected _triangle: NdcFillingTriangle;
+
+    protected _program: Program;
+    protected _UInverseVP: WebGLUniformLocation;
+    protected _uEye: WebGLUniformLocation;
     protected _aVertex: GLuint;
 
-    protected _blit: gloperate.BlitPass;
-
-    protected _defaultFBO: gloperate.DefaultFramebuffer;
-    protected _colorRenderTexture: gloperate.Texture2;
-    protected _depthRenderbuffer: gloperate.Renderbuffer;
-    protected _intermediateFBO: gloperate.Framebuffer;
+    // rendering
+    protected _blit: BlitPass;
+    protected _defaultFBO: DefaultFramebuffer;
+    protected _colorRenderTexture: Texture2;
+    protected _depthRenderbuffer: Renderbuffer;
+    protected _intermediateFBO: Framebuffer;
 
 
     protected onUpdate(): void {
@@ -42,52 +39,41 @@ export class SkyTriangle extends gloperate.AbstractRenderer {
 
 
         if (this._program === undefined) {
-            this._program = new gloperate.Program(this.context);
+            this._program = new Program(this.context);
         }
 
         if (!this._program.initialized) {
 
-            const vert = new gloperate.Shader(this.context, gl.VERTEX_SHADER, 'skytriangle.vert');
+            const vert = new Shader(this.context, gl.VERTEX_SHADER, 'skytriangle.vert');
             vert.initialize(require('./skytriangle.vert'));
-            const frag = new gloperate.Shader(this.context, gl.FRAGMENT_SHADER, 'skytriangle.frag');
+            const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'skytriangle.frag');
             frag.initialize(require('./skytriangle.frag'));
 
             this._program.initialize([vert, frag]);
             this._aVertex = this._program.attribute('a_vertex', 0);
-
-            this._uNdcOffset = this._program.uniform('u_ndcOffset');
         }
 
 
-        if (this._ndcTriangle === undefined) {
-            this._ndcTriangle = new gloperate.NdcFillingTriangle(this.context);
+        if (this._triangle === undefined) {
+            this._triangle = new NdcFillingTriangle(this.context);
         }
 
-        if (!this._ndcTriangle.initialized) {
-            this._ndcTriangle.initialize(this._aVertex);
+        if (!this._triangle.initialized) {
+            this._triangle.initialize(this._aVertex);
         }
-
-        if (this._ndcOffsetKernel === undefined) {
-            this._ndcOffsetKernel = new gloperate.AntiAliasingKernel(this._multiFrameNumber);
-        }
-
-        if (this._altered.multiFrameNumber) {
-            this._ndcOffsetKernel.width = this._multiFrameNumber;
-        }
-
 
         if (this._intermediateFBO === undefined) {
-            this._defaultFBO = new gloperate.DefaultFramebuffer(this.context, 'DefaultFBO');
+            this._defaultFBO = new DefaultFramebuffer(this.context, 'DefaultFBO');
             this._defaultFBO.initialize();
 
-            this._colorRenderTexture = new gloperate.Texture2(this.context, 'ColorRenderTexture');
+            this._colorRenderTexture = new Texture2(this.context, 'ColorRenderTexture');
             this._colorRenderTexture.initialize(this._frameSize[0], this._frameSize[1],
                 this.context.isWebGL2 ? gl.RGBA8 : gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE);
 
-            this._depthRenderbuffer = new gloperate.Renderbuffer(this.context, 'DepthRenderbuffer');
+            this._depthRenderbuffer = new Renderbuffer(this.context, 'DepthRenderbuffer');
             this._depthRenderbuffer.initialize(this._frameSize[0], this._frameSize[1], gl.DEPTH_COMPONENT16);
 
-            this._intermediateFBO = new gloperate.Framebuffer(this.context, 'IntermediateFBO');
+            this._intermediateFBO = new Framebuffer(this.context, 'IntermediateFBO');
             this._intermediateFBO.initialize([[gl2facade.COLOR_ATTACHMENT0, this._colorRenderTexture]
                 , [gl.DEPTH_ATTACHMENT, this._depthRenderbuffer]]);
         }
@@ -102,10 +88,10 @@ export class SkyTriangle extends gloperate.AbstractRenderer {
 
 
         if (this._blit === undefined) {
-            this._blit = new gloperate.BlitPass(this.context);
+            this._blit = new BlitPass(this.context);
         }
         if (!this._blit.initialized) {
-            this._blit.initialize(this._ndcTriangle);
+            this._blit.initialize(this._triangle);
             this._blit.framebuffer = this._intermediateFBO;
             this._blit.readBuffer = gl2facade.COLOR_ATTACHMENT0;
             this._blit.drawBuffer = gl.BACK;
@@ -122,14 +108,9 @@ export class SkyTriangle extends gloperate.AbstractRenderer {
 
         this._program.bind();
 
-        const ndcOffset = this._ndcOffsetKernel.get(frameNumber);
-        ndcOffset[0] = 2.0 * ndcOffset[0] / this._frameSize[0];
-        ndcOffset[1] = 2.0 * ndcOffset[1] / this._frameSize[1];
-        gl.uniform2fv(this._uNdcOffset, ndcOffset);
-
         this._intermediateFBO.clear(gl.COLOR_BUFFER_BIT, true, false);
-        this._ndcTriangle.bind();
-        this._ndcTriangle.draw();
+        this._triangle.bind();
+        this._triangle.draw();
         this._intermediateFBO.unbind();
     }
 
@@ -140,12 +121,11 @@ export class SkyTriangle extends gloperate.AbstractRenderer {
     protected onDispose(): void {
 
         if (this._program && this._program.initialized) {
-            this._uNdcOffset = -1;
             this._program.uninitialize();
         }
 
-        if (this._ndcTriangle && this._ndcTriangle.initialized) {
-            this._ndcTriangle.uninitialize();
+        if (this._triangle && this._triangle.initialized) {
+            this._triangle.uninitialize();
         }
 
         if (this._intermediateFBO.initialized) {
