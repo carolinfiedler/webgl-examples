@@ -1,4 +1,4 @@
-mixin example(source, author, title, caption)
+mixin example(author, title, caption)
   doctype html
   html(lang = 'en')
     include partial/head.pug
@@ -13,14 +13,7 @@ mixin example(source, author, title, caption)
           p.lead #{caption}
   
       section.container
-        div.row
-          div.col
-            - var id = 'example-canvas'
-            include partial/canvas.pug
+        - var id = 'example-canvas'
+        include partial/canvas.pug
 
         p.text-right by #{author}, featuring #[a(href = 'https://github.com/cginternals/webgl-operate') webgl-operate].
-
-
-  
-      include partial/foot.pug
-  
