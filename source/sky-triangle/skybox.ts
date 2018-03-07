@@ -170,6 +170,7 @@ export class Skybox extends AbstractRenderer {
             this._camera.eye = vec3.fromValues(0.0, 0.0, 0.0);
             this._camera.near = 0.1;
             this._camera.far = 15.0;
+            this._camera.fovy = 100.0;
         }
 
         if (this._defaultFBO === undefined) {
@@ -193,6 +194,7 @@ export class Skybox extends AbstractRenderer {
         const gl = this.context.gl;
 
         gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
+        this._camera.viewport = [this._frameSize[0], this._frameSize[1]];
         // update angle
         const speed = 1.0;
         if (this._rotate) {
