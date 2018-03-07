@@ -18,11 +18,14 @@ export class Cube extends Geometry {
     ]);
 
     protected static readonly INDICES = new Uint8Array([
+        0, 1, 2, 3, 7, 1, 5, 4, 7, 6, 2, 4, 0, 1,
+        /*
         1, 1, 0,
         4, 2, 6,
         7, 4, 5,
         1, 7, 3,
         2, 1, 0,
+        */
     ]);
 
 

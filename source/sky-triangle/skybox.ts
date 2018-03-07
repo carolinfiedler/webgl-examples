@@ -6,7 +6,7 @@ import {
     Shader, Texture2, TextureCube,
 } from 'webgl-operate';
 
-import { vec3 } from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
 
 import { Cube } from './cube';
 
@@ -18,18 +18,15 @@ export class Skybox extends AbstractRenderer {
     // shared
     protected _camera: Camera;
 
-    protected _cube: Cube;
-
     protected _defaultFBO: DefaultFramebuffer;
 
-    protected _texture: Texture2;
-    protected _skyboxTexture: TextureCube;
-    protected _imagesLoaded = 0;
-    protected _cubeImages: [HTMLImageElement, HTMLImageElement, HTMLImageElement,
-        HTMLImageElement, HTMLImageElement, HTMLImageElement];
-
     // skybox
-    protected _program: Program;
+    protected _skyCube: Cube;
+    protected _skyTexture: TextureCube;
+    protected _imagesLoaded = 0;
+    protected _skyImages: [HTMLImageElement, HTMLImageElement, HTMLImageElement,
+        HTMLImageElement, HTMLImageElement, HTMLImageElement];
+    protected _skyProgram: Program;
     protected _uTransform: WebGLUniformLocation;
     protected _uEye: WebGLUniformLocation;
     protected _uBackground: WebGLUniformLocation;
@@ -39,67 +36,41 @@ export class Skybox extends AbstractRenderer {
     protected _angle = 0.0;
     protected _rotate = true;
 
-    protected onUpdate(): void {
+    // flying cubes
+    protected _cube: Cube;
+    protected _cubeProgram: Program;
+    protected _uViewProjection: WebGLUniformLocation;
+    protected _uModel: WebGLUniformLocation;
+    protected _aCubeVertex: GLuint;
+    protected _cubeMatrix1: mat4;
+    protected _cubeMatrix2: mat4;
+
+
+    protected updateSky(): void {
         const gl = this.context.gl;
 
-        if (this._extensions === false && this.context.isWebGL1) {
-            assert(this.context.supportsStandardDerivatives, `expected OES_standard_derivatives support`);
-            /* tslint:disable-next-line:no-unused-expression */
-            this.context.standardDerivatives;
-            this._extensions = true;
+        if (this._skyProgram === undefined) {
+            this._skyProgram = new Program(this.context);
         }
 
-        if (this._camera === undefined) {
-            this._camera = new Camera();
-        }
-
-        if (this._program === undefined) {
-            this._program = new Program(this.context);
-        }
-
-        if (!this._program.initialized) {
+        if (!this._skyProgram.initialized) {
 
             const vert = new Shader(this.context, gl.VERTEX_SHADER, 'skybox.vert');
             vert.initialize(require('./skybox.vert'));
             const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'skybox.frag');
             frag.initialize(require('./skybox.frag'));
 
-            this._program.initialize([vert, frag]);
-            this._aVertex = this._program.attribute('in_vertex', 0);
+            this._skyProgram.initialize([vert, frag]);
+            this._aVertex = this._skyProgram.attribute('in_vertex', 0);
 
-            this._uTransform = this._program.uniform('transform');
-            this._uEye = this._program.uniform('eye');
-            this._uBackground = this._program.uniform('background');
+            this._uTransform = this._skyProgram.uniform('transform');
+            this._uEye = this._skyProgram.uniform('eye');
+            this._uBackground = this._skyProgram.uniform('background');
         }
 
-        if (this._cube === undefined) {
-            this._cube = new Cube(this.context, 'sky_box');
-        }
-
-        if (!this._cube.initialized) {
-            this._cube.initialize(this._aVertex);
-        }
-
-        if (this._texture === undefined) {
-            this._texture = new Texture2(this.context);
-            // Fill the texture with a 1x1 blue pixel.
-            this._texture.initialize(1, 1, gl.RGB8, gl.RGB, gl.UNSIGNED_BYTE);
-            this._texture.data(new Uint8Array([255, 0, 255]));
-
-
-            const image = new Image();
-            image.src = 'img/soap.png';
-            image.addEventListener('load', () => {
-                // Now that the image has loaded make copy it to the texture.
-                this._texture.resize(image.width, image.height);
-                this._texture.data(image);
-                this.invalidate();
-            });
-        }
-
-        if (this._skyboxTexture === undefined) {
-            this._skyboxTexture = new TextureCube(this.context);
-            this._skyboxTexture.initialize(1, 1, gl.RGB8, gl.RGB, gl.UNSIGNED_BYTE);
+        if (this._skyTexture === undefined) {
+            this._skyTexture = new TextureCube(this.context);
+            this._skyTexture.initialize(1, 1, gl.RGB8, gl.RGB, gl.UNSIGNED_BYTE);
 
             const px = new Image();
             const nx = new Image();
@@ -107,6 +78,8 @@ export class Skybox extends AbstractRenderer {
             const ny = new Image();
             const pz = new Image();
             const nz = new Image();
+
+            this._skyImages = [px, nx, py, ny, pz, nz];
 
             px.src = 'img/skybox.px.png';
             nx.src = 'img/skybox.nx.png';
@@ -124,24 +97,90 @@ export class Skybox extends AbstractRenderer {
             nz.addEventListener('load', callback);
         }
 
-        // after all 6 are loaded
         if (this._imagesLoaded === 6) {
-            this._skyboxTexture.resize(this._cubeImages[0].width, this._cubeImages[0].height);
-            this._skyboxTexture.data(this._cubeImages);
+            this._skyTexture.resize(this._skyImages[0].width, this._skyImages[0].height);
+            this._skyTexture.data(this._skyImages);
+        }
+
+        if (this._skyCube === undefined) {
+            this._skyCube = new Cube(this.context, 'sky_box');
+        }
+
+        if (!this._skyCube.initialized) {
+            this._skyCube.initialize(this._aVertex);
+        }
+    }
+
+    protected updateCube(): void {
+        const gl = this.context.gl;
+
+        if (this._cubeProgram === undefined) {
+            this._cubeProgram = new Program(this.context);
+        }
+
+        if (!this._cubeProgram.initialized) {
+
+            const vert = new Shader(this.context, gl.VERTEX_SHADER, 'cube.vert');
+            vert.initialize(require('./cube.vert'));
+            const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
+            frag.initialize(require('./cube.frag'));
+
+            this._cubeProgram.initialize([vert, frag]);
+            this._aCubeVertex = this._cubeProgram.attribute('in_vertex', 0);
+
+            this._uViewProjection = this._cubeProgram.uniform('viewProjection');
+            this._uModel = this._cubeProgram.uniform('model');
+        }
+
+        if (this._cube === undefined) {
+            this._cube = new Cube(this.context, 'cube');
+        }
+
+        if (!this._cube.initialized) {
+            this._cube.initialize(this._aCubeVertex);
+        }
+
+        if (this._cubeMatrix1 === undefined) {
+            const scale = mat4.fromScaling(mat4.create(), vec3.fromValues(0.3, 0.3, 0.3));
+            const translate = mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, -0.5, 1.0));
+            this._cubeMatrix1 = mat4.multiply(mat4.create(), translate, scale);
+        }
+
+        if (this._cubeMatrix2 === undefined) {
+            const scale = mat4.fromScaling(mat4.create(), vec3.fromValues(0.4, 0.4, 0.4));
+            const translate = mat4.fromTranslation(mat4.create(), vec3.fromValues(-3.0, 0.5, -2.0));
+            this._cubeMatrix2 = mat4.multiply(mat4.create(), translate, scale);
+        }
+    }
+
+
+    protected onUpdate(): void {
+
+        if (this._extensions === false && this.context.isWebGL1) {
+            assert(this.context.supportsStandardDerivatives, `expected OES_standard_derivatives support`);
+            /* tslint:disable-next-line:no-unused-expression */
+            this.context.standardDerivatives;
+            this._extensions = true;
+        }
+
+        if (this._camera === undefined) {
+            this._camera = new Camera();
+            this._camera.center = vec3.fromValues(0.0, 0.0, 1.0);
+            this._camera.up = vec3.fromValues(0.0, 1.0, 0.0);
+            this._camera.eye = vec3.fromValues(0.0, 0.0, 0.0);
+            this._camera.near = 0.1;
+            this._camera.far = 15.0;
         }
 
         if (this._defaultFBO === undefined) {
             this._defaultFBO = new DefaultFramebuffer(this.context, 'DefaultFBO');
             this._defaultFBO.initialize();
-
-            // this._colorRenderTexture = new Texture2(this.context, 'ColorRenderTexture');
-            // this._colorRenderTexture.initialize(this._frameSize[0], this._frameSize[1],
-            //     this.context.isWebGL2 ? gl.RGBA8 : gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE);
         }
 
-        if (this._altered.frameSize) {
-            // this._intermediateFBO.resize(this._frameSize[0], this._frameSize[1]);
-        }
+
+        this.updateSky();
+        this.updateCube();
+
 
         if (this._altered.clearColor) {
             this._defaultFBO.clearColor(this._clearColor);
@@ -154,29 +193,41 @@ export class Skybox extends AbstractRenderer {
         const gl = this.context.gl;
 
         gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
-
-        this._program.bind();
-
         // update angle
         const speed = 1.0;
         if (this._rotate) {
             this._angle = (this._angle + speed) % 360;
         }
-        const radiants = this._angle * Math.PI / 180.0;
-        this._camera.center = vec3.fromValues(Math.sin(radiants), 0.0, Math.cos(radiants));
-
-        gl.uniformMatrix4fv(this._uTransform, gl.GL_FALSE, this._camera.viewProjection);
-        gl.uniform3fv(this._uEye, this._camera.eye);
-
-        // this._texture.bind(0);
-        this._skyboxTexture.bind(0);
-        gl.uniform1i(this._uBackground, 0);
+        const radians = this._angle * Math.PI / 180.0;
+        this._camera.center = vec3.fromValues(Math.sin(radians), 0.0, Math.cos(radians));
 
         this._defaultFBO.bind();
-        this._defaultFBO.clear(gl.COLOR_BUFFER_BIT, true, false);
+        this._defaultFBO.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, false, false);
+
+        // render sky
+        gl.disable(gl.CULL_FACE);
+        this._skyProgram.bind();
+        gl.uniformMatrix4fv(this._uTransform, gl.GL_FALSE, this._camera.viewProjection);
+        gl.uniform3fv(this._uEye, this._camera.eye);
+        this._skyTexture.bind(0);
+        gl.uniform1i(this._uBackground, 0);
+        this._skyCube.bind();
+        this._skyCube.draw();
+        this._skyCube.unbind();
+        this._skyProgram.unbind();
+        gl.enable(gl.CULL_FACE);
+
+        // render two flying cubes
+        this._cubeProgram.bind();
         this._cube.bind();
+        gl.uniformMatrix4fv(this._uViewProjection, gl.GL_FALSE, this._camera.viewProjection);
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix1);
+        this._cube.draw();
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix2);
         this._cube.draw();
         this._cube.unbind();
+        this._cubeProgram.unbind();
+
         this._defaultFBO.unbind();
     }
 
@@ -186,8 +237,8 @@ export class Skybox extends AbstractRenderer {
 
     protected onDispose(): void {
 
-        if (this._program && this._program.initialized) {
-            this._program.uninitialize();
+        if (this._skyProgram && this._skyProgram.initialized) {
+            this._skyProgram.uninitialize();
         }
 
         if (this._cube && this._cube.initialized) {
