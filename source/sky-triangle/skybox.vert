@@ -1,17 +1,23 @@
 
 precision lowp float;
 
-in vec3 in_vertex;
+@import ../shaders/facade.frag;
 
-uniform mat4 transform;
-uniform float far;
-uniform vec3 eye;
+#if __VERSION__ == 100
+    attribute vec2 a_vertex;
+#else 
+    layout(location = 0) in vec2 a_vertex;
+#endif
+
+uniform mat4  u_transform;
+uniform vec3  u_eye;
 
 out vec3 v_uv;
 
 void main()
 {
-	vec4 vertex = transform * vec4(in_vertex + eye, 1.0);
-    gl_Position = vertex.xyww;
     v_uv = in_vertex;
+
+    vec4 vertex = u_transform * vec4(a_vertex + u_eye, 1.0);
+    gl_Position = vertex.xyww;    
 }
