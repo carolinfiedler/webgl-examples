@@ -8,39 +8,46 @@ import {
 
 export class SkyTriangle {
 
-    protected _skyTriangle: NdcFillingTriangle;
-    protected _skyProgram: Program;
-    protected _uInverseVP: WebGLUniformLocation;
+    protected _context: Context;
+
+    protected _triangle: NdcFillingTriangle;
+
+    protected _program: Program;
+    protected _uInverseViewProjection: WebGLUniformLocation;
     protected _uEye: WebGLUniformLocation;
     protected _uBackground: WebGLUniformLocation;
-    protected _aVertex: GLuint;
-
-    protected _context: Context;
 
 
     initialize(context: Context): void {
         const gl = context.gl;
         this._context = context;
 
-        // init program
-        this._skyProgram = new Program(this._context);
         const vert = new Shader(this._context, gl.VERTEX_SHADER, 'skytriangle.vert');
         vert.initialize(require('./skytriangle.vert'));
         const frag = new Shader(this._context, gl.FRAGMENT_SHADER, 'skytriangle.frag');
         frag.initialize(require('./skytriangle.frag'));
-        this._skyProgram.initialize([vert, frag]);
-        this._aVertex = this._skyProgram.attribute('in_vertex', 0);
-        this._uInverseVP = this._skyProgram.uniform('inverseViewProjection');
-        this._uEye = this._skyProgram.uniform('eye');
-        this._uBackground = this._skyProgram.uniform('background');
 
-        // init geometry
-        this._skyTriangle = new NdcFillingTriangle(this._context);
-        this._skyTriangle.initialize(this._aVertex);
+        this._program = new Program(this._context);
+        this._program.initialize([vert, frag]);
 
+        this._uInverseViewProjection = this._program.uniform('u_inverseViewProjection');
+        this._uEye = this._program.uniform('u_eye');
+        this._uBackground = this._program.uniform('u_background');
+
+        this._triangle = new NdcFillingTriangle(this._context);
+        const aVertex = this._program.attribute('a_vertex', 0);
+        this._triangle.initialize(aVertex);
     }
 
+    uninitialize(): void {
+        this._uInverseViewProjection = -1;
+        this._uEye = -1;
+        this._uBackground = -1;
 
+        this._program.uninitialize();
+        this._triangle.uninitialize();
+    }
+    
     render(camera: Camera, cubeMap: TextureCube): void {
         const gl = this._context.gl;
 
@@ -50,16 +57,18 @@ export class SkyTriangle {
         gl.depthMask(false);
         gl.depthFunc(gl.LEQUAL);
 
-        this._skyProgram.bind();
+        this._program.bind();
         gl.uniformMatrix4fv(this._uInverseVP, gl.GL_FALSE, camera.viewProjectionInverse);
         gl.uniform3fv(this._uEye, camera.eye);
         gl.uniform1i(this._uBackground, 0);
+
         cubeMap.bind(0);
-        this._skyTriangle.bind();
-        this._skyTriangle.draw();
-        this._skyTriangle.unbind();
+        this._triangle.bind();
+        this._triangle.draw();
+        this._triangle.unbind();
         cubeMap.unbind();
-        this._skyProgram.unbind();
+        
+        this._program.unbind();
 
         gl.depthFunc(gl.LESS);
         gl.depthMask(true);
@@ -67,10 +76,4 @@ export class SkyTriangle {
         gl.disable(gl.CULL_FACE);
     }
 
-
-    uninitialize(): void {
-
-        this._skyProgram.uninitialize();
-        this._skyTriangle.uninitialize();
-    }
 }
