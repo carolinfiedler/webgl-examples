@@ -32,12 +32,12 @@ export class Skybox {
         this._program = new Program(context);
         this._program.initialize([vert, frag]);
 
-        this._uTransform = this._program.uniform('transform');
-        this._uEye = this._program.uniform('eye');
-        this._uBackground = this._program.uniform('background');
+        this._uTransform = this._program.uniform('u_transform');
+        this._uEye = this._program.uniform('u_eye');
+        this._uBackground = this._program.uniform('u_background');
 
         this._cube = new Cube(this._context);
-        const aVertex = this._program.attribute('in_vertex', 0);
+        const aVertex = this._program.attribute('a_vertex', 0);
         this._cube.initialize(aVertex);
     }
 
