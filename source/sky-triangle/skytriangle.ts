@@ -47,7 +47,7 @@ export class SkyTriangle {
         this._program.uninitialize();
         this._triangle.uninitialize();
     }
-    
+
     render(camera: Camera, cubeMap: TextureCube): void {
         const gl = this._context.gl;
 
@@ -58,7 +58,7 @@ export class SkyTriangle {
         gl.depthFunc(gl.LEQUAL);
 
         this._program.bind();
-        gl.uniformMatrix4fv(this._uInverseVP, gl.GL_FALSE, camera.viewProjectionInverse);
+        gl.uniformMatrix4fv(this._uInverseViewProjection, gl.GL_FALSE, camera.viewProjectionInverse);
         gl.uniform3fv(this._uEye, camera.eye);
         gl.uniform1i(this._uBackground, 0);
 
@@ -67,7 +67,7 @@ export class SkyTriangle {
         this._triangle.draw();
         this._triangle.unbind();
         cubeMap.unbind();
-        
+
         this._program.unbind();
 
         gl.depthFunc(gl.LESS);

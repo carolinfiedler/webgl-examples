@@ -128,12 +128,12 @@ export class SplitRenderer extends AbstractRenderer {
         const pz = new Image();
         const nz = new Image();
 
-        px.src = 'img/skybox.px.png';
-        nx.src = 'img/skybox.nx.png';
-        py.src = 'img/skybox.py.png';
-        ny.src = 'img/skybox.ny.png';
-        pz.src = 'img/skybox.pz.png';
-        nz.src = 'img/skybox.nz.png';
+        px.src = 'data/skybox.px.png';
+        nx.src = 'data/skybox.nx.png';
+        py.src = 'data/skybox.py.png';
+        ny.src = 'data/skybox.ny.png';
+        pz.src = 'data/skybox.pz.png';
+        nz.src = 'data/skybox.nz.png';
 
         let imagesLoaded = 0;
         const callback = () => {
