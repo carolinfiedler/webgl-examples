@@ -1,15 +1,23 @@
 
-#extension OES_standard_derivatives : enable
- 
 precision lowp float;
 
-uniform samplerCube background;
+@import ../shaders/facade.frag;
 
-in vec3 v_uv;
 
-out vec4 out_color;
+#if __VERSION__ == 100
+    #define fragColor gl_FragColor
+    // #extension GL_OES_standard_derivatives : enable
+#else 
+    layout(location = 0) out vec4 fragColor;
+#endif
 
-void main()
+
+uniform samplerCube u_background;
+
+varying vec3 v_uv;
+
+
+void main(void)
 {
     vec3 uv = (v_uv);
     /*
@@ -19,5 +27,12 @@ void main()
     vec3 color = texture(background, uv).rgb;
     out_color = vec4(mix(vec3(0,0,0), vec3(1,0,0), density), 1.0);
     */
-    out_color = texture(background, normalize(v_uv));
+
+#if __VERSION__ == 100
+    vec3 color = textureCube(u_background, normalize(v_uv)).rgb;
+#else
+    vec3 color = texture(u_background, normalize(v_uv)).rgb;
+#endif
+
+    fragColor = vec4(color, 1.0);
 }

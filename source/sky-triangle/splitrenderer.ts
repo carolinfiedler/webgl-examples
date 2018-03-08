@@ -4,8 +4,8 @@ import { assert } from '../auxiliaries';
 import { mat4, vec3 } from 'gl-matrix';
 
 import {
-    AbstractRenderer, AntiAliasingKernel, BlitPass, Camera, Context, DefaultFramebuffer, Framebuffer,
-    NdcFillingTriangle, Program, Renderbuffer, Shader, Texture2, TextureCube,
+    AbstractRenderer, AntiAliasingKernel, BlitPass, Camera, Context, DefaultFramebuffer,
+    Framebuffer, NdcFillingTriangle, Program, Renderbuffer, Shader, Texture2, TextureCube,
 } from 'webgl-operate';
 
 import { Cube } from './cube';
@@ -51,7 +51,7 @@ export class SplitRenderer extends AbstractRenderer {
     protected onUpdate(): void {
 
         // update camera angle
-        const speed = 1.0;
+        const speed = 0.1;
         if (this._rotate) {
             this._angle = (this._angle + speed) % 360;
         }
@@ -85,7 +85,9 @@ export class SplitRenderer extends AbstractRenderer {
         gl.enable(gl.CULL_FACE);
         gl.cullFace(gl.BACK);
         gl.enable(gl.DEPTH_TEST);
+
         this._cubeProgram.bind();
+
         gl.uniformMatrix4fv(this._uViewProjection, gl.GL_FALSE, this._camera.viewProjection);
         gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix1);
         this._cube.bind();
@@ -93,7 +95,9 @@ export class SplitRenderer extends AbstractRenderer {
         gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix2);
         this._cube.draw();
         this._cube.unbind();
+
         this._cubeProgram.unbind();
+
         gl.cullFace(gl.BACK);
         gl.disable(gl.CULL_FACE);
 
@@ -171,15 +175,17 @@ export class SplitRenderer extends AbstractRenderer {
         }
 
         // init program
-        this._cubeProgram = new Program(this.context);
         const vert = new Shader(this.context, gl.VERTEX_SHADER, 'cube.vert');
         vert.initialize(require('./cube.vert'));
         const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
         frag.initialize(require('./cube.frag'));
+
+        this._cubeProgram = new Program(this.context);
         this._cubeProgram.initialize([vert, frag]);
-        this._aCubeVertex = this._cubeProgram.attribute('in_vertex', 0);
-        this._uViewProjection = this._cubeProgram.uniform('viewProjection');
-        this._uModel = this._cubeProgram.uniform('model');
+
+        this._aCubeVertex = this._cubeProgram.attribute('a_vertex', 0);
+        this._uViewProjection = this._cubeProgram.uniform('u_viewProjection');
+        this._uModel = this._cubeProgram.uniform('u_model');
 
         // init flying cubes
         this._cube = new Cube(this.context, 'cube');

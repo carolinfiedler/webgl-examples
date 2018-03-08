@@ -1,11 +1,20 @@
 
 precision lowp float;
 
-in vec3 v_vertex;
+@import ../shaders/facade.frag;
 
-out vec4 out_color;
 
-void main()
+#if __VERSION__ == 100
+    #define fragColor gl_FragColor
+#else 
+    layout(location = 0) out vec4 fragColor;
+#endif
+
+
+varying vec3 v_vertex;
+
+
+void main(void)
 {
-    out_color = vec4(v_vertex, 1.0);
+    fragColor = vec4(v_vertex, 1.0);
 }

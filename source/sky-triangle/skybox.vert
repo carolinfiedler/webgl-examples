@@ -1,7 +1,8 @@
 
 precision lowp float;
 
-@import ../shaders/facade.frag;
+@import ../shaders/facade.vert;
+
 
 #if __VERSION__ == 100
     attribute vec3 a_vertex;
@@ -9,12 +10,14 @@ precision lowp float;
     layout(location = 0) in vec3 a_vertex;
 #endif
 
-uniform mat4  u_transform;
-uniform vec3  u_eye;
 
-out vec3 v_uv;
+uniform mat4 u_transform;
+uniform vec3 u_eye;
 
-void main()
+varying vec3 v_uv;
+
+
+void main(void)
 {
     v_uv = a_vertex;
 

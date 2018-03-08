@@ -1,15 +1,23 @@
 
 precision lowp float;
 
-in vec3 in_vertex;
+@import ../shaders/facade.vert;
 
-uniform mat4 viewProjection;
-uniform mat4 model;
 
-out vec3 v_vertex;
+#if __VERSION__ == 100
+    attribute vec3 a_vertex;
+#else 
+    layout(location = 0) in vec3 a_vertex;
+#endif
+
+uniform mat4 u_viewProjection;
+uniform mat4 u_model;
+
+varying vec3 v_vertex;
+
 
 void main()
 {
-    v_vertex = in_vertex;
-    gl_Position = viewProjection * model * vec4(in_vertex, 1.0);
+    v_vertex = a_vertex;
+    gl_Position = u_viewProjection * u_model * vec4(a_vertex, 1.0);
 }
