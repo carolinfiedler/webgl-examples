@@ -3,27 +3,21 @@ precision lowp float;
 
 @import ../shaders/facade.frag;
 
-
 #if __VERSION__ == 100
     #define fragColor gl_FragColor
-    #extension GL_OES_standard_derivatives : enable
-#else 
+#else
     layout(location = 0) out vec4 fragColor;
 #endif
 
 
-varying vec2 v_uv;
+uniform samplerCube u_background;
+uniform vec3 u_eye;
 
+in vec2 v_uv;
+in vec4 v_ray;
 
-void main(void)
+void main()
 {
-    vec3 color = vec3(28.0 / 255.0, 117.0 / 255.0, 188.0 / 255.0);
-    color += (vec3(0.0, v_uv) - 0.5) * 0.125;
-
-    vec2 awidth = fwidth(v_uv) * 8.0;
-    vec2 cstep = abs(step(awidth, v_uv) - step(awidth, 1.0 - v_uv));
-    if(!any(bvec2(cstep))) {
-        discard;
-    }
-    fragColor = vec4(color, 1.0); 
+    vec3 stu = normalize(v_ray.xyz - u_eye);
+    fragColor = vec4(texture(u_background, stu).rgb, 1.0);
 }

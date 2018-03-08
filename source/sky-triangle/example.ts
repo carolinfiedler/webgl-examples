@@ -1,13 +1,18 @@
 
 declare var gloperate: any;
 
+import { Canvas } from 'webgl-operate';
+
+import { Skybox } from './skybox';
 import { SkyTriangle } from './skytriangle';
+import { SplitRenderer } from './splitrenderer';
 
 
 function onload() {
-    const canvas = new gloperate.Canvas('example-canvas');
+    const canvas = new Canvas('example-canvas');
     const context = canvas.context;
-    const renderer = new SkyTriangle();
+
+    const renderer = new SplitRenderer();
     canvas.renderer = renderer;
 
     // export variables
