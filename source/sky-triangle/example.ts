@@ -10,6 +10,8 @@ import { SplitRenderer } from './splitrenderer';
 
 function onload() {
     const canvas = new Canvas('example-canvas');
+    canvas.clearColor.fromHex('f8f9fa');
+
     const context = canvas.context;
 
     const renderer = new SplitRenderer();
