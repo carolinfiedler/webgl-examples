@@ -2,7 +2,7 @@
 import { assert } from '../auxiliaries';
 
 import {
-    Camera, Context, Initializable, Program, Shader, TextureCube,
+    Camera, Context, Program, Shader, TextureCube,
 } from 'webgl-operate';
 
 import { Cube } from './cube';
@@ -50,7 +50,6 @@ export class Skybox {
         this._cube.uninitialize();
     }
     
-    @Initializable.assert_initialized()
     render(camera: Camera, cubeMap: TextureCube): void {
         const gl = this._context.gl;
 
