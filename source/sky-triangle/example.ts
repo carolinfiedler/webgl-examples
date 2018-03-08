@@ -13,11 +13,6 @@ function onload() {
     const context = canvas.context;
 
     const renderer = new SplitRenderer();
-    renderer.leftRenderer = new Skybox();
-    renderer.leftRenderer.initialize(context, () => { });
-    renderer.rightRenderer = new SkyTriangle();
-    renderer.rightRenderer.initialize(context, () => { });
-
     canvas.renderer = renderer;
 
     // export variables
