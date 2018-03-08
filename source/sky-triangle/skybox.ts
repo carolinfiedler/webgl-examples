@@ -46,10 +46,11 @@ export class Skybox {
         const gl = this._context.gl;
 
         // render sky
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.FRONT);
         gl.enable(gl.DEPTH_TEST);
         gl.depthMask(false);
         gl.depthFunc(gl.LEQUAL);
-        gl.disable(gl.CULL_FACE);
 
         this._skyProgram.bind();
         gl.uniformMatrix4fv(this._uTransform, gl.GL_FALSE, camera.viewProjection);
@@ -64,7 +65,8 @@ export class Skybox {
 
         gl.depthFunc(gl.LESS);
         gl.depthMask(true);
-        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+        gl.disable(gl.CULL_FACE);
     }
 
 

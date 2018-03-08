@@ -44,10 +44,11 @@ export class SkyTriangle {
     render(camera: Camera, cubeMap: TextureCube): void {
         const gl = this._context.gl;
 
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
         gl.enable(gl.DEPTH_TEST);
         gl.depthMask(false);
         gl.depthFunc(gl.LEQUAL);
-        gl.disable(gl.CULL_FACE);
 
         this._skyProgram.bind();
         gl.uniformMatrix4fv(this._uInverseVP, gl.GL_FALSE, camera.viewProjectionInverse);
@@ -62,7 +63,8 @@ export class SkyTriangle {
 
         gl.depthFunc(gl.LESS);
         gl.depthMask(true);
-        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+        gl.disable(gl.CULL_FACE);
     }
 
 

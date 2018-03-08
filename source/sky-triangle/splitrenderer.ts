@@ -82,6 +82,8 @@ export class SplitRenderer extends AbstractRenderer {
         this._camera.viewport = [this._frameSize[0], this._frameSize[1]];
         gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
 
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
         gl.enable(gl.DEPTH_TEST);
         this._cubeProgram.bind();
         gl.uniformMatrix4fv(this._uViewProjection, gl.GL_FALSE, this._camera.viewProjection);
@@ -92,15 +94,17 @@ export class SplitRenderer extends AbstractRenderer {
         this._cube.draw();
         this._cube.unbind();
         this._cubeProgram.unbind();
+        gl.cullFace(gl.BACK);
+        gl.disable(gl.CULL_FACE);
 
         // render split
-        this._camera.viewport = [this._frameSize[0] / 2, this._frameSize[1]];
-
-        gl.viewport(0, 0, this._frameSize[0] / 2, this._frameSize[1]);
+        gl.enable(gl.SCISSOR_TEST);
+        gl.scissor(0, 0, this._frameSize[0] / 2 - 1, this._frameSize[1]);
         this._skyBox.render(this._camera, this._cubeMap);
 
-        gl.viewport(this._frameSize[0] / 2, 0, this._frameSize[0], this._frameSize[1]);
+        gl.scissor(this._frameSize[0] / 2 + 1, 0, this._frameSize[0] / 2 - 1, this._frameSize[1]);
         this._skyTriangle.render(this._camera, this._cubeMap);
+        gl.disable(gl.SCISSOR_TEST);
 
         // unbind FBO
         this._intermediateFBO.unbind();
