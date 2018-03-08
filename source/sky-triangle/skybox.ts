@@ -18,8 +18,6 @@ export class Skybox extends AbstractRenderer {
     // shared
     protected _camera: Camera;
 
-    protected _defaultFBO: DefaultFramebuffer;
-
     // skybox
     protected _skyCube: Cube;
     protected _skyTexture: TextureCube;
@@ -35,15 +33,6 @@ export class Skybox extends AbstractRenderer {
     // rotation
     protected _angle = 0.0;
     protected _rotate = true;
-
-    // flying cubes
-    protected _cube: Cube;
-    protected _cubeProgram: Program;
-    protected _uViewProjection: WebGLUniformLocation;
-    protected _uModel: WebGLUniformLocation;
-    protected _aCubeVertex: GLuint;
-    protected _cubeMatrix1: mat4;
-    protected _cubeMatrix2: mat4;
 
 
     protected updateSky(): void {
@@ -111,49 +100,6 @@ export class Skybox extends AbstractRenderer {
         }
     }
 
-    protected updateCube(): void {
-        const gl = this.context.gl;
-
-        if (this._cubeProgram === undefined) {
-            this._cubeProgram = new Program(this.context);
-        }
-
-        if (!this._cubeProgram.initialized) {
-
-            const vert = new Shader(this.context, gl.VERTEX_SHADER, 'cube.vert');
-            vert.initialize(require('./cube.vert'));
-            const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
-            frag.initialize(require('./cube.frag'));
-
-            this._cubeProgram.initialize([vert, frag]);
-            this._aCubeVertex = this._cubeProgram.attribute('in_vertex', 0);
-
-            this._uViewProjection = this._cubeProgram.uniform('viewProjection');
-            this._uModel = this._cubeProgram.uniform('model');
-        }
-
-        if (this._cube === undefined) {
-            this._cube = new Cube(this.context, 'cube');
-        }
-
-        if (!this._cube.initialized) {
-            this._cube.initialize(this._aCubeVertex);
-        }
-
-        if (this._cubeMatrix1 === undefined) {
-            const scale = mat4.fromScaling(mat4.create(), vec3.fromValues(0.3, 0.3, 0.3));
-            const translate = mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, -0.5, 1.0));
-            this._cubeMatrix1 = mat4.multiply(mat4.create(), translate, scale);
-        }
-
-        if (this._cubeMatrix2 === undefined) {
-            const scale = mat4.fromScaling(mat4.create(), vec3.fromValues(0.4, 0.4, 0.4));
-            const translate = mat4.fromTranslation(mat4.create(), vec3.fromValues(-3.0, 0.5, -2.0));
-            this._cubeMatrix2 = mat4.multiply(mat4.create(), translate, scale);
-        }
-    }
-
-
     protected onUpdate(): void {
 
         if (this._extensions === false && this.context.isWebGL1) {
@@ -170,22 +116,9 @@ export class Skybox extends AbstractRenderer {
             this._camera.eye = vec3.fromValues(0.0, 0.0, 0.0);
             this._camera.near = 0.1;
             this._camera.far = 15.0;
-            this._camera.fovy = 100.0;
         }
-
-        if (this._defaultFBO === undefined) {
-            this._defaultFBO = new DefaultFramebuffer(this.context, 'DefaultFBO');
-            this._defaultFBO.initialize();
-        }
-
 
         this.updateSky();
-        this.updateCube();
-
-
-        if (this._altered.clearColor) {
-            this._defaultFBO.clearColor(this._clearColor);
-        }
 
         this._altered.reset();
     }
@@ -193,7 +126,6 @@ export class Skybox extends AbstractRenderer {
     protected onFrame(frameNumber: number): void {
         const gl = this.context.gl;
 
-        gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
         this._camera.viewport = [this._frameSize[0], this._frameSize[1]];
         // update angle
         const speed = 1.0;
@@ -203,11 +135,12 @@ export class Skybox extends AbstractRenderer {
         const radians = this._angle * Math.PI / 180.0;
         this._camera.center = vec3.fromValues(Math.sin(radians), 0.0, Math.cos(radians));
 
-        this._defaultFBO.bind();
-        this._defaultFBO.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, false, false);
-
         // render sky
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthMask(false);
+        gl.depthFunc(gl.LEQUAL);
         gl.disable(gl.CULL_FACE);
+
         this._skyProgram.bind();
         gl.uniformMatrix4fv(this._uTransform, gl.GL_FALSE, this._camera.viewProjection);
         gl.uniform3fv(this._uEye, this._camera.eye);
@@ -216,21 +149,14 @@ export class Skybox extends AbstractRenderer {
         this._skyCube.bind();
         this._skyCube.draw();
         this._skyCube.unbind();
+        this._skyTexture.unbind();
         this._skyProgram.unbind();
+
+        gl.depthFunc(gl.LESS);
+        gl.depthMask(true);
         gl.enable(gl.CULL_FACE);
 
-        // render two flying cubes
-        this._cubeProgram.bind();
-        this._cube.bind();
-        gl.uniformMatrix4fv(this._uViewProjection, gl.GL_FALSE, this._camera.viewProjection);
-        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix1);
-        this._cube.draw();
-        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix2);
-        this._cube.draw();
-        this._cube.unbind();
-        this._cubeProgram.unbind();
 
-        this._defaultFBO.unbind();
     }
 
     protected onSwap(): void {
@@ -241,14 +167,6 @@ export class Skybox extends AbstractRenderer {
 
         if (this._skyProgram && this._skyProgram.initialized) {
             this._skyProgram.uninitialize();
-        }
-
-        if (this._cube && this._cube.initialized) {
-            this._cube.uninitialize();
-        }
-
-        if (this._defaultFBO.initialized) {
-            this._defaultFBO.uninitialize();
         }
     }
 

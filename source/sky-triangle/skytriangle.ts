@@ -31,13 +31,6 @@ export class SkyTriangle extends AbstractRenderer {
     protected _angle = 0.0;
     protected _rotate = true;
 
-    // rendering
-    protected _blit: BlitPass;
-    protected _defaultFBO: DefaultFramebuffer;
-    protected _colorRenderTexture: Texture2;
-    protected _depthRenderbuffer: Renderbuffer;
-    protected _intermediateFBO: Framebuffer;
-
 
     protected updateSkyTriangle(): void {
         const gl = this.context.gl;
@@ -127,49 +120,14 @@ export class SkyTriangle extends AbstractRenderer {
             this._camera.far = 15.0;
         }
 
-        if (this._intermediateFBO === undefined) {
-            this._defaultFBO = new DefaultFramebuffer(this.context, 'DefaultFBO');
-            this._defaultFBO.initialize();
-
-            this._colorRenderTexture = new Texture2(this.context, 'ColorRenderTexture');
-            this._colorRenderTexture.initialize(this._frameSize[0], this._frameSize[1],
-                this.context.isWebGL2 ? gl.RGBA8 : gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE);
-
-            this._depthRenderbuffer = new Renderbuffer(this.context, 'DepthRenderbuffer');
-            this._depthRenderbuffer.initialize(this._frameSize[0], this._frameSize[1], gl.DEPTH_COMPONENT16);
-
-            this._intermediateFBO = new Framebuffer(this.context, 'IntermediateFBO');
-            this._intermediateFBO.initialize([[gl2facade.COLOR_ATTACHMENT0, this._colorRenderTexture]
-                , [gl.DEPTH_ATTACHMENT, this._depthRenderbuffer]]);
-        }
-
-        if (this._altered.frameSize) {
-            this._intermediateFBO.resize(this._frameSize[0], this._frameSize[1]);
-        }
-
-        if (this._altered.clearColor) {
-            this._intermediateFBO.clearColor(this._clearColor);
-        }
-
-
-        if (this._blit === undefined) {
-            this._blit = new BlitPass(this.context);
-        }
-        if (!this._blit.initialized) {
-            this._blit.initialize(this._skyTriangle);
-            this._blit.framebuffer = this._intermediateFBO;
-            this._blit.readBuffer = gl2facade.COLOR_ATTACHMENT0;
-            this._blit.drawBuffer = gl.BACK;
-            this._blit.target = this._defaultFBO;
-        }
-
         this._altered.reset();
     }
 
     protected onFrame(frameNumber: number): void {
         const gl = this.context.gl;
 
-        gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
+        // gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
+        this._camera.viewport = [this._frameSize[0], this._frameSize[1]];
 
         // update angle
         const speed = 1.0;
@@ -179,9 +137,10 @@ export class SkyTriangle extends AbstractRenderer {
         const radians = this._angle * Math.PI / 180.0;
         this._camera.center = vec3.fromValues(Math.sin(radians), 0.0, Math.cos(radians));
 
-        // render
-        this._intermediateFBO.bind();
-        this._intermediateFBO.clear(gl.COLOR_BUFFER_BIT, false, false);
+        gl.enable(gl.DEPTH_TEST);
+        gl.depthMask(false);
+        gl.depthFunc(gl.LEQUAL);
+        gl.disable(gl.CULL_FACE);
 
         this._skyProgram.bind();
         gl.uniformMatrix4fv(this._uInverseVP, gl.GL_FALSE, this._camera.viewProjectionInverse);
@@ -193,11 +152,13 @@ export class SkyTriangle extends AbstractRenderer {
         this._skyTriangle.draw();
         this._skyTriangle.unbind();
 
-        this._intermediateFBO.unbind();
+        gl.depthFunc(gl.LESS);
+        gl.depthMask(true);
+        gl.enable(gl.CULL_FACE);
     }
 
     protected onSwap(): void {
-        this._blit.frame();
+        // this._blit.frame();
         this.invalidate();
     }
 
@@ -209,17 +170,6 @@ export class SkyTriangle extends AbstractRenderer {
 
         if (this._skyTriangle && this._skyTriangle.initialized) {
             this._skyTriangle.uninitialize();
-        }
-
-        if (this._intermediateFBO.initialized) {
-            this._intermediateFBO.uninitialize();
-            this._defaultFBO.uninitialize();
-            this._colorRenderTexture.uninitialize();
-            this._depthRenderbuffer.uninitialize();
-        }
-
-        if (this._blit && this._blit.initialized) {
-            this._blit.uninitialize();
         }
     }
 

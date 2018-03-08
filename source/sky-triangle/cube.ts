@@ -74,7 +74,7 @@ export class Cube extends Geometry {
         const gl = this.context.gl;
 
         // TODO: do not bind index to location 4
-        const valid = super.initialize([gl.ARRAY_BUFFER, gl.ELEMENT_ARRAY_BUFFER], [aVertex, 4]);
+        const valid = super.initialize([gl.ARRAY_BUFFER, gl.ELEMENT_ARRAY_BUFFER], [aVertex, 8]);
 
         assert(this._buffers[0] !== undefined && this._buffers[0].object instanceof WebGLBuffer,
             `expected valid WebGLBuffer`);
