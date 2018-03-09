@@ -17,8 +17,8 @@ const websiteDir = './website';
 const assets = [
     ['./', distDir, ['examples.json']],
     ['./data', distDir + '/data', ['*']],
-    [websiteDir, distDir, ['css/*.css', 'js/*.js', 'img/*.{svg,png}', 'fonts/*', '*.{svg,png,ico,xml,json}']],
-    ['./node_modules/webgl-operate/dist', distDir + '/js', ['webgl-operate.{js,js.map}']]];
+    [websiteDir, distDir, ['css/*.css', 'js/*.js', 'img/*.{svg,png}', 'fonts/*', '*.{svg,png,ico,xml,json}']]];
+//    ['./node_modules/webgl-operate/dist', distDir + '/js', ['webgl-operate.{js,js.map}']]];
 
 const copy = require('./copy.js');
 
