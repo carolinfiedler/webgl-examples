@@ -37,7 +37,7 @@ function build() {
             console.log('skipped:', example);
             return;
         }
-        const html = pug.renderFile(src);
+        const html = pug.renderFile(src, { pretty: true });
         fs.writeFileSync(dst, html);
         console.log('emitted:', dst);
     });

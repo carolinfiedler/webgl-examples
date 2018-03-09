@@ -1,14 +1,17 @@
+extends partial/example.pug
+
+block vars 
+  - var title   = 'Test Renderer'
+  - var author  = 'cgcostume'
+  - var caption = 'Simple rendering showing a pixel-width outline using OES_standard_derivatives.'
+  - var source  = 'test-renderer.js'
+
 
 include partial/code.pug
-include partial/example.pug
 
-+begin_example('Test Renderer', 'cgcostume', 'Simple rendering showing a pixel-width outline using OES_standard_derivatives.')
-
-section.container
-  h4 Example Breadown
-  p This should describe the example in much more detail, e.g., refering to relevant code snippets and resources
-
-  +code('jsdelivr', '<script src="https://cdn.jsdelivr.net/npm/webgl-operate@0.1.6/dist/webgl-operate.min.js"></script>'
-    , 'You can integrate webgl-operate as bundled JavaScript in your HTML:')
-
-+end_example('test-renderer.js')
+block breakdown 
+  section.container
+    h4 Example Breadown
+    p This should describe the example in much more detail, e.g., refering to relevant code snippets and resources
+  
+    +code('example-code', 'const example.code.for.breakdown = here;', 'Example code for source break down:')

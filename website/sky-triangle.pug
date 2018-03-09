@@ -1,14 +1,17 @@
+extends partial/example.pug
+
+block vars 
+  - var title   = 'Sky Triangle'
+  - var author  = 'cgcostume, chistopher, maikz'
+  - var caption = 'ToDo.'
+  - var source  = 'sky-triangle.js'
+
 
 include partial/code.pug
-include partial/example.pug
 
-+begin_example('Sky Triangle', 'cgcostume, chistopher, maikz', 'ToDo.')
-
-section.container
-  h4 Example Breadown
-  p This should describe the example in much more detail, e.g., refering to relevant code snippets and resources
-
-  +code('jsdelivr', '<script src="https://cdn.jsdelivr.net/npm/webgl-operate@0.1.6/dist/webgl-operate.min.js"></script>'
-    , 'You can integrate webgl-operate as bundled JavaScript in your HTML:')
-
-+end_example('sky-triangle.js')
+block breakdown 
+  section.container
+    h4 Example Breadown
+    p This should describe the example in much more detail, e.g., refering to relevant code snippets and resources
+  
+    +code('example-code', 'const example.code.for.breakdown = here;', 'Example code for source break down:')
