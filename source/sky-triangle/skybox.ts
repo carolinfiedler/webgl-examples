@@ -11,7 +11,7 @@ import { Cube } from './cube';
 export class Skybox {
 
     protected _context: Context;
-    
+
     protected _cube: Cube;
 
     protected _program: Program;
@@ -49,7 +49,7 @@ export class Skybox {
         this._program.uninitialize();
         this._cube.uninitialize();
     }
-    
+
     render(camera: Camera, cubeMap: TextureCube): void {
         const gl = this._context.gl;
 
@@ -69,7 +69,7 @@ export class Skybox {
         this._cube.draw();
         this._cube.unbind();
         cubeMap.unbind();
-        
+
         this._program.unbind();
 
         gl.depthFunc(gl.LESS);

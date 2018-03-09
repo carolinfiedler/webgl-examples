@@ -5,7 +5,7 @@ import { mat4, vec3 } from 'gl-matrix';
 
 import {
     AbstractRenderer, AntiAliasingKernel, BlitPass, Camera, Context, DefaultFramebuffer,
-    Framebuffer, NdcFillingTriangle, Program, Renderbuffer, Shader, Texture2, TextureCube,
+    Framebuffer, NdcFillingTriangle, Program, Renderbuffer, Shader, Texture2, TextureCube, Wizard,
 } from 'webgl-operate';
 
 import { Cube } from './cube';
@@ -30,7 +30,6 @@ export class SplitRenderer extends AbstractRenderer {
 
     // rotation
     protected _camera: Camera;
-    protected _angle = 0.0;
     protected _rotate = true;
 
     // flying cubes
@@ -51,12 +50,12 @@ export class SplitRenderer extends AbstractRenderer {
     protected onUpdate(): void {
 
         // update camera angle
-        const speed = 0.1;
         if (this._rotate) {
-            this._angle = (this._angle + speed) % 360;
+            const speed = 0.01;
+            const angle = (window.performance.now() * speed) % 360;
+            const radians = angle * Math.PI / 180.0;
+            this._camera.center = vec3.fromValues(Math.sin(radians), 0.0, Math.cos(radians));
         }
-        const radians = this._angle * Math.PI / 180.0;
-        this._camera.center = vec3.fromValues(Math.sin(radians), 0.0, Math.cos(radians));
 
         // resize
         if (this._altered.frameSize) {
@@ -123,7 +122,8 @@ export class SplitRenderer extends AbstractRenderer {
         const gl = this.context.gl;
 
         this._cubeMap = new TextureCube(this.context);
-        this._cubeMap.initialize(1, 1, gl.RGB8, gl.RGB, gl.UNSIGNED_BYTE);
+        const internalFormatAndType = Wizard.queryInternalTextureFormat(this.context, gl.RGB, 'byte');
+        this._cubeMap.initialize(1, 1, internalFormatAndType[0], gl.RGB, internalFormatAndType[1]);
 
         const px = new Image();
         const nx = new Image();
