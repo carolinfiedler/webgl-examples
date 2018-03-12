@@ -10,11 +10,20 @@ precision lowp float;
     layout(location = 0) out vec4 fragColor;
 #endif
 
-
-varying vec3 v_vertex;
-
+uniform sampler2D u_spriteTexture;
+varying vec2 v_uv;
 
 void main(void)
 {
-    fragColor = vec4(v_vertex, 1.0);
+    float alpha;
+    #if __VERSION__ == 100
+        alpha = texture2D(u_spriteTexture, v_uv).r;
+    #else 
+        alpha = texture(u_spriteTexture, v_uv).r;
+    #endif
+
+    fragColor = alpha < 0.5 ? vec4(vec3(1.0), 1.0) : vec4(vec3(0.0), 1.0);
+
+    if(alpha < 0.01)
+        discard;
 }

@@ -5,7 +5,7 @@ import { mat4, vec3 } from 'gl-matrix';
 
 import {
     AbstractRenderer, AntiAliasingKernel, BlitPass, Camera, Context, DefaultFramebuffer,
-    Framebuffer, NdcFillingTriangle, Program, Renderbuffer, Shader, Texture2, TextureCube,
+    Framebuffer, NdcFillingRectangle, Program, Renderbuffer, Shader, Texture2, TextureCube,
 } from 'webgl-operate';
 
 import { Cube } from './cube';
@@ -34,13 +34,19 @@ export class SplitRenderer extends AbstractRenderer {
     protected _rotate = true;
 
     // flying cubes
-    protected _cube: Cube;
-    protected _cubeProgram: Program;
+    protected _sprite: NdcFillingRectangle;
+    protected _spriteProgram: Program;
+    protected _spriteTextures: Texture2[];
     protected _uViewProjection: WebGLUniformLocation;
     protected _uModel: WebGLUniformLocation;
-    protected _aCubeVertex: GLuint;
-    protected _cubeMatrix1: mat4;
-    protected _cubeMatrix2: mat4;
+    protected _uSpriteTexture: WebGLUniformLocation;
+    protected _aSpriteVertex: GLuint;
+    protected _spriteMatrixPx: mat4;
+    protected _spriteMatrixNx: mat4;
+    protected _spriteMatrixPy: mat4;
+    protected _spriteMatrixNy: mat4;
+    protected _spriteMatrixPz: mat4;
+    protected _spriteMatrixNz: mat4;
 
     // skyBox and skyTriangle use the same cubeMap
     protected _cubeMap: TextureCube;
@@ -51,7 +57,7 @@ export class SplitRenderer extends AbstractRenderer {
     protected onUpdate(): void {
 
         // update camera angle
-        const speed = 0.1;
+        const speed = 0.001;
         if (this._rotate) {
             this._angle = (this._angle + speed) % 360;
         }
@@ -86,17 +92,41 @@ export class SplitRenderer extends AbstractRenderer {
         gl.cullFace(gl.BACK);
         gl.enable(gl.DEPTH_TEST);
 
-        this._cubeProgram.bind();
+        this._spriteProgram.bind();
 
         gl.uniformMatrix4fv(this._uViewProjection, gl.GL_FALSE, this._camera.viewProjection);
-        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix1);
-        this._cube.bind();
-        this._cube.draw();
-        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._cubeMatrix2);
-        this._cube.draw();
-        this._cube.unbind();
+        gl.uniform1i(this._uSpriteTexture, 0);
 
-        this._cubeProgram.unbind();
+        this._sprite.bind();
+
+        this._spriteTextures[0].bind(0);
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._spriteMatrixPx);
+        this._sprite.draw();
+
+        this._spriteTextures[1].bind(0);
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._spriteMatrixNx);
+        this._sprite.draw();
+
+        this._spriteTextures[2].bind(0);
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._spriteMatrixPy);
+        this._sprite.draw();
+
+        this._spriteTextures[3].bind(0);
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._spriteMatrixNy);
+        this._sprite.draw();
+
+        this._spriteTextures[4].bind(0);
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._spriteMatrixPz);
+        this._sprite.draw();
+
+        this._spriteTextures[5].bind(0);
+        gl.uniformMatrix4fv(this._uModel, gl.GL_FALSE, this._spriteMatrixNz);
+        this._sprite.draw();
+
+        this._spriteTextures[0].unbind();
+        this._sprite.unbind();
+
+        this._spriteProgram.unbind();
 
         gl.cullFace(gl.BACK);
         gl.disable(gl.CULL_FACE);
@@ -154,6 +184,30 @@ export class SplitRenderer extends AbstractRenderer {
         ny.addEventListener('load', callback);
         pz.addEventListener('load', callback);
         nz.addEventListener('load', callback);
+
+        const images: HTMLImageElement[] =
+            [new Image(), new Image(), new Image(), new Image(), new Image(), new Image()];
+
+        images[0].src = 'data/axis_px.png';
+        images[1].src = 'data/axis_nx.png';
+        images[2].src = 'data/axis_py.png';
+        images[3].src = 'data/axis_ny.png';
+        images[4].src = 'data/axis_pz.png';
+        images[5].src = 'data/axis_nz.png';
+
+        const callbackSprites = () => {
+            for (const i in this._spriteTextures) {
+                this._spriteTextures[i].resize(images[i].width, images[i].height);
+                this._spriteTextures[i].data(images[i]);
+            }
+        };
+
+        this._spriteTextures = new Array(6);
+        for (let i = 0; i < 6; ++i) {
+            this._spriteTextures[i] = new Texture2(this.context);
+            this._spriteTextures[i].initialize(1, 1, gl.RGB8, gl.RGB, gl.UNSIGNED_BYTE);
+            images[i].addEventListener('load', callbackSprites);
+        }
     }
 
     initialize(context: Context, callback: Invalidate): boolean {
@@ -180,22 +234,48 @@ export class SplitRenderer extends AbstractRenderer {
         const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
         frag.initialize(require('./cube.frag'));
 
-        this._cubeProgram = new Program(this.context);
-        this._cubeProgram.initialize([vert, frag]);
+        this._spriteProgram = new Program(this.context);
+        this._spriteProgram.initialize([vert, frag]);
 
-        this._aCubeVertex = this._cubeProgram.attribute('a_vertex', 0);
-        this._uViewProjection = this._cubeProgram.uniform('u_viewProjection');
-        this._uModel = this._cubeProgram.uniform('u_model');
+        this._aSpriteVertex = this._spriteProgram.attribute('a_vertex', 0);
+        this._uViewProjection = this._spriteProgram.uniform('u_viewProjection');
+        this._uModel = this._spriteProgram.uniform('u_model');
+        this._uSpriteTexture = this._spriteProgram.uniform('u_spriteTexture');
 
         // init flying cubes
-        this._cube = new Cube(this.context, 'cube');
-        this._cube.initialize(this._aCubeVertex);
-        const scale1 = mat4.fromScaling(mat4.create(), vec3.fromValues(0.3, 0.3, 0.3));
-        const translate1 = mat4.fromTranslation(mat4.create(), vec3.fromValues(2.0, -0.5, 1.0));
-        this._cubeMatrix1 = mat4.multiply(mat4.create(), translate1, scale1);
-        const scale2 = mat4.fromScaling(mat4.create(), vec3.fromValues(0.4, 0.4, 0.4));
-        const translate2 = mat4.fromTranslation(mat4.create(), vec3.fromValues(-3.0, 0.5, -2.0));
-        this._cubeMatrix2 = mat4.multiply(mat4.create(), translate2, scale2);
+        this._sprite = new NdcFillingRectangle(this.context, 'sprite');
+        this._sprite.initialize(this._aSpriteVertex);
+        const scale = mat4.fromScaling(mat4.create(), vec3.fromValues(0.1, 0.05, 1.0));
+
+        const rotatePx = mat4.fromRotation(mat4.create(), 1.5 * Math.PI, vec3.fromValues(0, 1, 0));
+        const translatePx = mat4.fromTranslation(mat4.create(), vec3.fromValues(1.0, 0.0, 0.0));
+        this._spriteMatrixPx = mat4.multiply(mat4.create(), rotatePx, scale);
+        this._spriteMatrixPx = mat4.multiply(mat4.create(), translatePx, this._spriteMatrixPx);
+
+        const rotateNx = mat4.fromRotation(mat4.create(), 0.5 * Math.PI, vec3.fromValues(0, 1, 0));
+        const translateNx = mat4.fromTranslation(mat4.create(), vec3.fromValues(-1.0, 0.0, 0.0));
+        this._spriteMatrixNx = mat4.multiply(mat4.create(), rotateNx, scale);
+        this._spriteMatrixNx = mat4.multiply(mat4.create(), translateNx, this._spriteMatrixNx);
+
+        const rotatePy = mat4.fromRotation(mat4.create(), 0.5 * Math.PI, vec3.fromValues(1, 0, 0));
+        const translatePy = mat4.fromTranslation(mat4.create(), vec3.fromValues(0.0, 1.0, 0.0));
+        this._spriteMatrixPy = mat4.multiply(mat4.create(), rotatePy, scale);
+        this._spriteMatrixPy = mat4.multiply(mat4.create(), translatePy, this._spriteMatrixPy);
+
+        const rotateNy = mat4.fromRotation(mat4.create(), 1.5 * Math.PI, vec3.fromValues(1, 0, 0));
+        const translateNy = mat4.fromTranslation(mat4.create(), vec3.fromValues(0.0, -1.0, 0.0));
+        this._spriteMatrixNy = mat4.multiply(mat4.create(), rotateNy, scale);
+        this._spriteMatrixNy = mat4.multiply(mat4.create(), translateNy, this._spriteMatrixNy);
+
+        const rotatePz = mat4.fromRotation(mat4.create(), Math.PI, vec3.fromValues(0, 1, 0));
+        const translatePz = mat4.fromTranslation(mat4.create(), vec3.fromValues(0.0, 0.0, 1.0));
+        this._spriteMatrixPz = mat4.multiply(mat4.create(), rotatePz, scale);
+        this._spriteMatrixPz = mat4.multiply(mat4.create(), translatePz, this._spriteMatrixPz);
+
+        const rotateNz = mat4.fromRotation(mat4.create(), 0, vec3.fromValues(0, 1, 0));
+        const translateNz = mat4.fromTranslation(mat4.create(), vec3.fromValues(0.0, 0.0, -1.0));
+        this._spriteMatrixNz = mat4.multiply(mat4.create(), rotateNz, scale);
+        this._spriteMatrixNz = mat4.multiply(mat4.create(), translateNz, this._spriteMatrixNz);
 
         // init camera
         this._camera = new Camera();
@@ -237,13 +317,17 @@ export class SplitRenderer extends AbstractRenderer {
     uninitialize(): void {
         super.uninitialize();
 
-        this._cube.uninitialize();
+        this._sprite.uninitialize();
 
         this._intermediateFBO.uninitialize();
         this._defaultFBO.uninitialize();
         this._colorRenderTexture.uninitialize();
         this._depthRenderbuffer.uninitialize();
         this._blit.uninitialize();
+
+        for (const tex of this._spriteTextures) {
+            tex.uninitialize();
+        }
 
         this._skyBox.uninitialize();
         this._skyTriangle.uninitialize();

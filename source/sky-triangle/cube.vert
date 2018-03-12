@@ -1,7 +1,7 @@
 
 precision lowp float;
 
-@import ../shaders/facade.vert;
+//@import ../shaders/facade.vert;
 
 
 #if __VERSION__ == 100
@@ -13,11 +13,11 @@ precision lowp float;
 uniform mat4 u_viewProjection;
 uniform mat4 u_model;
 
-varying vec3 v_vertex;
+varying vec2 v_uv;
 
 
 void main()
-{
-    v_vertex = a_vertex;
+{                       //why necessary?
+    v_uv = a_vertex.xy * vec2(1.0, -1.0) * 0.5 + 0.5;
     gl_Position = u_viewProjection * u_model * vec4(a_vertex, 1.0);
 }
