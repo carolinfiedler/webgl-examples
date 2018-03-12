@@ -1,40 +1,32 @@
 
-import { assert } from '../auxiliaries';
-
 import { mat4, vec3 } from 'gl-matrix';
 
-import {
-    AbstractRenderer, AntiAliasingKernel, BlitPass, Camera, Context, DefaultFramebuffer,
-    Framebuffer, NdcFillingTriangle, Program, Renderbuffer, Shader, Texture2, TextureCube, Wizard,
-} from 'webgl-operate';
+import * as gloperate from 'webgl-operate';
+
 
 import { Cube } from './cube';
 import { Skybox } from './skybox';
 import { SkyTriangle } from './skytriangle';
 
 
-// how to import this from webgl-operate/renderer ?
-interface Invalidate { (): void; }
-
-
-export class SplitRenderer extends AbstractRenderer {
+export class SplitRenderer extends gloperate.AbstractRenderer {
 
     protected _extensions = false;
 
     // FBO and Blit
-    protected _defaultFBO: DefaultFramebuffer;
-    protected _colorRenderTexture: Texture2;
-    protected _depthRenderbuffer: Renderbuffer;
-    protected _intermediateFBO: Framebuffer;
-    protected _blit: BlitPass;
+    protected _defaultFBO: gloperate.DefaultFramebuffer;
+    protected _colorRenderTexture: gloperate.Texture2;
+    protected _depthRenderbuffer: gloperate.Renderbuffer;
+    protected _intermediateFBO: gloperate.Framebuffer;
+    protected _blit: gloperate.BlitPass;
 
     // rotation
-    protected _camera: Camera;
+    protected _camera: gloperate.Camera;
     protected _rotate = true;
 
     // flying cubes
     protected _cube: Cube;
-    protected _cubeProgram: Program;
+    protected _cubeProgram: gloperate.Program;
     protected _uViewProjection: WebGLUniformLocation;
     protected _uModel: WebGLUniformLocation;
     protected _aCubeVertex: GLuint;
@@ -42,7 +34,7 @@ export class SplitRenderer extends AbstractRenderer {
     protected _cubeMatrix2: mat4;
 
     // skyBox and skyTriangle use the same cubeMap
-    protected _cubeMap: TextureCube;
+    protected _cubeMap: gloperate.TextureCube;
     protected _skyBox: Skybox;
     protected _skyTriangle: SkyTriangle;
 
@@ -103,10 +95,10 @@ export class SplitRenderer extends AbstractRenderer {
         // render split
         gl.enable(gl.SCISSOR_TEST);
         gl.scissor(0, 0, this._frameSize[0] / 2 - 1, this._frameSize[1]);
-        this._skyBox.render(this._camera, this._cubeMap);
+        this._skyBox.frame();
 
         gl.scissor(this._frameSize[0] / 2 + 1, 0, this._frameSize[0] / 2 - 1, this._frameSize[1]);
-        this._skyTriangle.render(this._camera, this._cubeMap);
+        this._skyTriangle.frame();
         gl.disable(gl.SCISSOR_TEST);
 
         // unbind FBO
@@ -121,8 +113,8 @@ export class SplitRenderer extends AbstractRenderer {
     protected loadImages(): void {
         const gl = this.context.gl;
 
-        this._cubeMap = new TextureCube(this.context);
-        const internalFormatAndType = Wizard.queryInternalTextureFormat(this.context, gl.RGB, 'byte');
+        this._cubeMap = new gloperate.TextureCube(this.context);
+        const internalFormatAndType = gloperate.Wizard.queryInternalTextureFormat(this.context, gl.RGB, 'byte');
         this._cubeMap.initialize(1, 1, internalFormatAndType[0], gl.RGB, internalFormatAndType[1]);
 
         const px = new Image();
@@ -156,7 +148,7 @@ export class SplitRenderer extends AbstractRenderer {
         nz.addEventListener('load', callback);
     }
 
-    initialize(context: Context, callback: Invalidate): boolean {
+    initialize(context: gloperate.Context, callback: gloperate.Invalidate): boolean {
         if (!super.initialize(context, callback)) {
             return false;
         }
@@ -168,19 +160,20 @@ export class SplitRenderer extends AbstractRenderer {
 
         // OpenGL stuff ?
         if (this._extensions === false && this.context.isWebGL1) {
-            assert(this.context.supportsStandardDerivatives, `expected OES_standard_derivatives support`);
+            gloperate.auxiliaries.assert(this.context.supportsStandardDerivatives,
+                `expected OES_standard_derivatives support`);
             /* tslint:disable-next-line:no-unused-expression */
             this.context.standardDerivatives;
             this._extensions = true;
         }
 
         // init program
-        const vert = new Shader(this.context, gl.VERTEX_SHADER, 'cube.vert');
+        const vert = new gloperate.Shader(this.context, gl.VERTEX_SHADER, 'cube.vert');
         vert.initialize(require('./cube.vert'));
-        const frag = new Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
+        const frag = new gloperate.Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
         frag.initialize(require('./cube.frag'));
 
-        this._cubeProgram = new Program(this.context);
+        this._cubeProgram = new gloperate.Program(this.context);
         this._cubeProgram.initialize([vert, frag]);
 
         this._aCubeVertex = this._cubeProgram.attribute('a_vertex', 0);
@@ -198,7 +191,7 @@ export class SplitRenderer extends AbstractRenderer {
         this._cubeMatrix2 = mat4.multiply(mat4.create(), translate2, scale2);
 
         // init camera
-        this._camera = new Camera();
+        this._camera = new gloperate.Camera();
         this._camera.center = vec3.fromValues(0.0, 0.0, 1.0);
         this._camera.up = vec3.fromValues(0.0, 1.0, 0.0);
         this._camera.eye = vec3.fromValues(0.0, 0.0, 0.0);
@@ -206,17 +199,17 @@ export class SplitRenderer extends AbstractRenderer {
         this._camera.far = 8.0;
 
         // init FBO & BlitPass
-        this._defaultFBO = new DefaultFramebuffer(this.context, 'DefaultFBO');
+        this._defaultFBO = new gloperate.DefaultFramebuffer(this.context, 'DefaultFBO');
         this._defaultFBO.initialize();
-        this._colorRenderTexture = new Texture2(this.context, 'ColorRenderTexture');
+        this._colorRenderTexture = new gloperate.Texture2(this.context, 'ColorRenderTexture');
         this._colorRenderTexture.initialize(480, 270,
             this.context.isWebGL2 ? gl.RGBA8 : gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE);
-        this._depthRenderbuffer = new Renderbuffer(this.context, 'DepthRenderbuffer');
+        this._depthRenderbuffer = new gloperate.Renderbuffer(this.context, 'DepthRenderbuffer');
         this._depthRenderbuffer.initialize(480, 270, gl.DEPTH_COMPONENT16);
-        this._intermediateFBO = new Framebuffer(this.context, 'IntermediateFBO');
+        this._intermediateFBO = new gloperate.Framebuffer(this.context, 'IntermediateFBO');
         this._intermediateFBO.initialize([[gl2facade.COLOR_ATTACHMENT0, this._colorRenderTexture]
             , [gl.DEPTH_ATTACHMENT, this._depthRenderbuffer]]);
-        this._blit = new BlitPass(this.context);
+        this._blit = new gloperate.BlitPass(this.context);
         this._blit.initialize();
         this._blit.framebuffer = this._intermediateFBO;
         this._blit.readBuffer = gl2facade.COLOR_ATTACHMENT0;
@@ -225,11 +218,11 @@ export class SplitRenderer extends AbstractRenderer {
 
         // init skyBox
         this._skyBox = new Skybox();
-        this._skyBox.initialize(this.context);
+        this._skyBox.initialize(this.context, this._camera, this._cubeMap);
 
         // init skyTriangle
         this._skyTriangle = new SkyTriangle();
-        this._skyTriangle.initialize(this.context);
+        this._skyTriangle.initialize(this.context, this._camera, this._cubeMap);
 
         return true;
     }

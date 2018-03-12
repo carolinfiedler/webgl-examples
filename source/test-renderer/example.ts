@@ -1,6 +1,6 @@
 
 
-declare var gloperate: any;
+import * as gloperate from 'webgl-operate';
 
 import { TestRenderer } from './testrenderer';
 

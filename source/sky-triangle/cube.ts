@@ -1,10 +1,8 @@
 
-import { assert } from '../auxiliaries';
-
-import { Buffer, Context, Geometry } from 'webgl-operate';
+import * as gloperate from 'webgl-operate';
 
 
-export class Cube extends Geometry {
+export class Cube extends gloperate.Geometry {
 
     protected static readonly VERTICES = new Float32Array([
         -1.0, -1.0, +1.0,
@@ -25,14 +23,14 @@ export class Cube extends Geometry {
      * @param context - Valid context to create the object for.
      * @param identifier - Meaningful name for identification of this instance.
      */
-    constructor(context: Context, identifier?: string) {
+    constructor(context: gloperate.Context, identifier?: string) {
         super(context, identifier);
 
         /* Generate identifier from constructor name if none given. */
         identifier = identifier !== undefined && identifier !== `` ? identifier : this.constructor.name;
 
-        const vertexVBO = new Buffer(context, identifier + 'VBO');
-        const indexBuffer = new Buffer(context, identifier + 'IndexBuffer');
+        const vertexVBO = new gloperate.Buffer(context, identifier + 'VBO');
+        const indexBuffer = new gloperate.Buffer(context, identifier + 'IndexBuffer');
         this._buffers.push(vertexVBO);
         this._buffers.push(indexBuffer);
     }
@@ -67,10 +65,10 @@ export class Cube extends Geometry {
         // TODO: do not bind index to location 4
         const valid = super.initialize([gl.ARRAY_BUFFER, gl.ELEMENT_ARRAY_BUFFER], [aVertex, 8]);
 
-        assert(this._buffers[0] !== undefined && this._buffers[0].object instanceof WebGLBuffer,
+        gloperate.auxiliaries.assert(this._buffers[0] !== undefined && this._buffers[0].object instanceof WebGLBuffer,
             `expected valid WebGLBuffer`);
 
-        assert(this._buffers[1] !== undefined && this._buffers[1].object instanceof WebGLBuffer,
+        gloperate.auxiliaries.assert(this._buffers[1] !== undefined && this._buffers[1].object instanceof WebGLBuffer,
             `expected valid WebGLBuffer`);
 
         this._buffers[0].data(Cube.VERTICES, gl.STATIC_DRAW);

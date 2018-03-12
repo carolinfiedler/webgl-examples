@@ -1,7 +1,5 @@
 
-declare var gloperate: any;
-
-import { Canvas } from 'webgl-operate';
+import * as gloperate from 'webgl-operate';
 
 import { Skybox } from './skybox';
 import { SkyTriangle } from './skytriangle';
@@ -9,7 +7,7 @@ import { SplitRenderer } from './splitrenderer';
 
 
 function onload() {
-    const canvas = new Canvas('example-canvas');
+    const canvas = new gloperate.Canvas('example-canvas');
     canvas.clearColor.fromHex('f8f9fa');
 
     const context = canvas.context;
