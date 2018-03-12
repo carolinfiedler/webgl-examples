@@ -43,7 +43,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
 
         // update camera angle
         if (this._rotate) {
-            const speed = 0.01;
+            const speed = 0.002;
             const angle = (window.performance.now() * speed) % 360;
             const radians = angle * Math.PI / 180.0;
             this._camera.center = vec3.fromValues(Math.sin(radians), 0.0, Math.cos(radians));
@@ -52,6 +52,10 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         // resize
         if (this._altered.frameSize) {
             this._intermediateFBO.resize(this._frameSize[0], this._frameSize[1]);
+            this._camera.viewport = [this._frameSize[0], this._frameSize[1]];
+        }
+        if (this._altered.canvasSize) {
+            this._camera.aspect = this._canvasSize[0] / this._canvasSize[1];
         }
 
         // update clear color
@@ -70,7 +74,6 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this._intermediateFBO.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, false, false);
 
         // render two flying cubes
-        this._camera.viewport = [this._frameSize[0], this._frameSize[1]];
         gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
 
         gl.enable(gl.CULL_FACE);
