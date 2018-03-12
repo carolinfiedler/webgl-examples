@@ -15,6 +15,7 @@ function onload() {
     canvas.renderer = renderer;
 
     canvas.element.addEventListener('click', function () { gloperate.viewer.Fullscreen.toggle(canvas.element); });
+    canvas.element.addEventListener('touchstart', function () { gloperate.viewer.Fullscreen.toggle(canvas.element); });
 
     // export variables
     (window as any)['canvas'] = canvas;
