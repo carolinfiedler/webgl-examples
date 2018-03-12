@@ -7,7 +7,7 @@ import { Buffer, Context, Geometry } from 'webgl-operate';
 export class Cube extends Geometry {
 
     protected static readonly VERTICES = new Float32Array([
-        -1.0, -1.0, +1.0, 
+        -1.0, -1.0, +1.0,
         +1.0, -1.0, +1.0,
         -1.0, +1.0, +1.0,
         +1.0, +1.0, +1.0,
@@ -80,7 +80,7 @@ export class Cube extends Geometry {
     }
 
     /**
-     * Specifies/invokes the draw of this screen-aligned triangle.
+     * Specifies/invokes the draw of this cube.
      */
     draw(): void {
         const gl = this.context.gl;

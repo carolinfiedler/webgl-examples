@@ -1,23 +1,26 @@
-mixin begin_example(title, author, caption)
-  doctype html
-  html(lang = 'en')
-    include head.pug
-    body.bg-light
-  
-      include navbar.pug
-  
-      section.container
-        header.jumbatron
-          h1 #{title}
-          p.lead #{caption}
-  
-      section.container
-        - var id = 'example-canvas'
-        include canvas.pug
 
-        p.text-right by #{author}, featuring #[a(href = 'https://github.com/cginternals/webgl-operate') webgl-operate].
+doctype html
+html(lang = 'en')
 
+  block vars
 
-mixin end_example(source)
-  script(src = source)
-  include foot.pug
+  include head.pug
+  body.bg-light
+  
+    include navbar.pug
+
+    section.container
+      header.jumbatron
+        h1 #{title}
+        p.lead #{caption}
+
+    section.container
+      - var id = 'example-canvas'
+      include canvas.pug
+
+      p.text-right by #{author}, featuring #[a(href = 'https://github.com/cginternals/webgl-operate') webgl-operate].
+
+    block breakdown
+
+    script(src = source)
+    include foot.pug
