@@ -25,9 +25,9 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
     protected _rotate = true;
 
     // flying cubes
-    protected _sprite: NdcFillingRectangle;
-    protected _spriteProgram: Program;
-    protected _spriteTextures: Texture2[];
+    protected _sprite: gloperate.NdcFillingRectangle;
+    protected _spriteProgram: gloperate.Program;
+    protected _spriteTextures: gloperate.Texture2[];
     protected _uViewProjection: WebGLUniformLocation;
     protected _uModel: WebGLUniformLocation;
     protected _uSpriteTexture: WebGLUniformLocation;
@@ -196,7 +196,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
 
         this._spriteTextures = new Array(6);
         for (let i = 0; i < 6; ++i) {
-            this._spriteTextures[i] = new Texture2(this.context);
+            this._spriteTextures[i] = new gloperate.Texture2(this.context);
             this._spriteTextures[i].initialize(1, 1, gl.RGB8, gl.RGB, gl.UNSIGNED_BYTE);
             images[i].addEventListener('load', callbackSprites);
         }
@@ -218,7 +218,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         const frag = new gloperate.Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
         frag.initialize(require('./cube.frag'));
 
-        this._spriteProgram = new Program(this.context);
+        this._spriteProgram = new gloperate.Program(this.context);
         this._spriteProgram.initialize([vert, frag]);
 
         this._aSpriteVertex = this._spriteProgram.attribute('a_vertex', 0);
@@ -227,7 +227,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this._uSpriteTexture = this._spriteProgram.uniform('u_spriteTexture');
 
         // init flying cubes
-        this._sprite = new NdcFillingRectangle(this.context, 'sprite');
+        this._sprite = new gloperate.NdcFillingRectangle(this.context, 'sprite');
         this._sprite.initialize(this._aSpriteVertex);
         const scale = mat4.fromScaling(mat4.create(), vec3.fromValues(0.1, 0.05, 1.0));
 
