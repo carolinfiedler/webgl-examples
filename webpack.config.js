@@ -8,6 +8,7 @@ module.exports = {
     cache: true,
     devtool: 'source-map',
     entry: {
+        'environment-projections': ['require.ts', 'environment-projections/example.ts'],
         'sky-triangle': ['require.ts', 'sky-triangle/example.ts'],
         'test-renderer': ['require.ts', 'test-renderer/example.ts']
     },

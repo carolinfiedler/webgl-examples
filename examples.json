@@ -1,6 +1,7 @@
 {
     "examples": [
         "test-renderer",
-        "sky-triangle"
+        "sky-triangle",
+        "environment-projections"
     ]
 }
