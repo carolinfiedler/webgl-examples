@@ -158,15 +158,6 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
 
         this.loadImages();
 
-        // OpenGL stuff ?
-        if (this._extensions === false && this.context.isWebGL1) {
-            gloperate.auxiliaries.assert(this.context.supportsStandardDerivatives,
-                `expected OES_standard_derivatives support`);
-            /* tslint:disable-next-line:no-unused-expression */
-            this.context.standardDerivatives;
-            this._extensions = true;
-        }
-
         // init program
         const vert = new gloperate.Shader(this.context, gl.VERTEX_SHADER, 'cube.vert');
         vert.initialize(require('./cube.vert'));

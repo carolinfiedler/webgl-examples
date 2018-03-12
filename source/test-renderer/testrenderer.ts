@@ -91,7 +91,8 @@ export class TestRenderer extends gloperate.AbstractRenderer {
         /* Enable required extensions. */
 
         if (this._extensions === false && this.context.isWebGL1) {
-            gloperate.auxiliaries.assert(this.context.supportsStandardDerivatives, `expected OES_standard_derivatives support`);
+            gloperate.auxiliaries.assert(this.context.supportsStandardDerivatives,
+                `expected OES_standard_derivatives support`);
             /* tslint:disable-next-line:no-unused-expression */
             this.context.standardDerivatives;
             this._extensions = true;
