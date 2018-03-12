@@ -1,35 +1,36 @@
 
-import { assert } from '../auxiliaries';
-
-import {
-    Camera, Context, Program, Shader, TextureCube,
-} from 'webgl-operate';
+import * as gloperate from 'webgl-operate';
 
 import { Cube } from './cube';
 
 
 export class Skybox {
 
-    protected _context: Context;
+    protected _context: gloperate.Context;
+    protected _camera: gloperate.Camera;
 
     protected _cube: Cube;
+    protected _texture: gloperate.TextureCube;
 
-    protected _program: Program;
+    protected _program: gloperate.Program;
     protected _uTransform: WebGLUniformLocation;
     protected _uEye: WebGLUniformLocation;
     protected _uBackground: WebGLUniformLocation;
 
 
-    initialize(context: Context): void {
-        const gl = context.gl;
+    initialize(context: gloperate.Context, camera: gloperate.Camera, texture: gloperate.TextureCube): void {
         this._context = context;
+        this._camera = camera;
+        this._texture = texture;
 
-        const vert = new Shader(this._context, gl.VERTEX_SHADER, 'skybox.vert');
+        const gl = this._context.gl;
+
+        const vert = new gloperate.Shader(this._context, gl.VERTEX_SHADER, 'skybox.vert');
         vert.initialize(require('./skybox.vert'));
-        const frag = new Shader(this._context, gl.FRAGMENT_SHADER, 'skybox.frag');
+        const frag = new gloperate.Shader(this._context, gl.FRAGMENT_SHADER, 'skybox.frag');
         frag.initialize(require('./skybox.frag'));
 
-        this._program = new Program(context);
+        this._program = new gloperate.Program(context);
         this._program.initialize([vert, frag]);
 
         this._uTransform = this._program.uniform('u_transform');
@@ -50,7 +51,7 @@ export class Skybox {
         this._cube.uninitialize();
     }
 
-    render(camera: Camera, cubeMap: TextureCube): void {
+    frame(): void {
         const gl = this._context.gl;
 
         gl.enable(gl.CULL_FACE);
@@ -60,15 +61,15 @@ export class Skybox {
         gl.depthFunc(gl.LEQUAL);
 
         this._program.bind();
-        gl.uniformMatrix4fv(this._uTransform, gl.GL_FALSE, camera.viewProjection);
-        gl.uniform3fv(this._uEye, camera.eye);
+        gl.uniformMatrix4fv(this._uTransform, gl.GL_FALSE, this._camera.viewProjection);
+        gl.uniform3fv(this._uEye, this._camera.eye);
         gl.uniform1i(this._uBackground, 0);
 
-        cubeMap.bind(0);
+        this._texture.bind(0);
         this._cube.bind();
         this._cube.draw();
         this._cube.unbind();
-        cubeMap.unbind();
+        this._texture.unbind();
 
         this._program.unbind();
 

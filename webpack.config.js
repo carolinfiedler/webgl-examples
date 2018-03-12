@@ -11,6 +11,9 @@ module.exports = {
         'sky-triangle': ['require.ts', 'sky-triangle/example.ts'],
         'test-renderer': ['require.ts', 'test-renderer/example.ts']
     },
+    externals: {
+        'webgl-operate': 'gloperate'
+    },
     output: {
         path: __dirname + '/dist',
         filename: '[name].js',

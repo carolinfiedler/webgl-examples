@@ -15,10 +15,10 @@ const distDir = './dist';
 const websiteDir = './website';
 
 const assets = [
-    ['./', distDir, ['examples.json']],
-    ['./data', distDir + '/data', ['*']],
-    [websiteDir, distDir, ['css/*.css', 'js/*.js', 'img/*.{svg,png}', 'fonts/*', '*.{svg,png,ico,xml,json}']]];
-//    ['./node_modules/webgl-operate/dist', distDir + '/js', ['webgl-operate.{js,js.map}']]];
+    ['./', distDir, ['examples.json'], false],
+    ['./data', distDir + '/data', ['*'], false],
+    [websiteDir, distDir, ['css/*.css', 'js/*.js', 'img/*.{svg,png}', 'fonts/*', '*.{svg,png,ico,xml,json}'], false],
+    ['./node_modules/webgl-operate/dist', distDir + '/js', ['webgl-operate.{js,js.map}'], true]];
 
 const copy = require('./copy.js');
 
@@ -28,7 +28,7 @@ const examples = require('./examples.json').examples;
 var build_pending = false;
 function build() {
 
-    assets.forEach((asset) => copy(asset[0], asset[1], asset[2]));
+    assets.forEach((asset) => copy(asset[0], asset[1], asset[2], asset[3]));
 
     examples.forEach((example) => {
         const src = path.join(websiteDir, example + '.pug');

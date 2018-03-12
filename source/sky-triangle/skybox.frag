@@ -6,7 +6,6 @@ precision lowp float;
 
 #if __VERSION__ == 100
     #define fragColor gl_FragColor
-    // #extension GL_OES_standard_derivatives : enable
 #else 
     layout(location = 0) out vec4 fragColor;
 #endif
