@@ -34,7 +34,7 @@
     },
     "peerDependencies": {
         "rxjs": "^5.5.6",
-        "webgl-operate": "^0.1.12"
+        "webgl-operate": "^0.1.13"
     },
     "scripts": {
         "build": "webpack",
