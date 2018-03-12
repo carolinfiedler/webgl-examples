@@ -18,8 +18,8 @@ varying vec2 v_uv;
 varying vec4 v_ray;
 
 void main(void)
-{
-    vec3 stu = normalize(v_ray.xyz - u_eye);
+{                                           // why necessary?
+    vec3 stu = normalize(v_ray.xyz - u_eye) * vec3(-1.0, 1.0, 1.0);
 
 #if __VERSION__ == 100
     vec3 color = textureCube(u_background, stu).rgb;

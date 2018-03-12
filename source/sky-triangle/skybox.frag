@@ -18,21 +18,21 @@ varying vec3 v_uv;
 
 
 void main(void)
-{
-    vec3 uv = (v_uv);
-    /*
-    vec3 w3 = abs(fwidth(uv));
-    float density = sqrt(w3.x * w3.x + w3.y * w3.y + w3.z * w3.z);
-    density *= 100.0;
-    vec3 color = texture(background, uv).rgb;
-    out_color = vec4(mix(vec3(0,0,0), vec3(1,0,0), density), 1.0);
-    */
+{                    // why necessary?
+    vec3 uv = v_uv * vec3(-1.0, 1.0, 1.0);
 
 #if __VERSION__ == 100
-    vec3 color = textureCube(u_background, normalize(v_uv)).rgb;
+    vec3 color = textureCube(u_background, normalize(uv)).rgb;
 #else
-    vec3 color = texture(u_background, normalize(v_uv)).rgb;
+    vec3 color = texture(u_background, normalize(uv)).rgb;
 #endif
 
     fragColor = vec4(color, 1.0);
+
+    /* visualize texel density
+    vec3 w3 = abs(fwidth(uv));
+    float density = sqrt(w3.x * w3.x + w3.y * w3.y + w3.z * w3.z);
+    density *= 100.0;
+    fragColor = vec4(mix(color, vec3(1,0,0), density), 1.0);
+    */
 }
