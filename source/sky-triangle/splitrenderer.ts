@@ -4,7 +4,6 @@ import { mat4, vec3 } from 'gl-matrix';
 import * as gloperate from 'webgl-operate';
 
 
-import { Cube } from './cube';
 import { Skybox } from './skybox';
 import { SkyTriangle } from './skytriangle';
 
@@ -24,7 +23,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
     protected _camera: gloperate.Camera;
     protected _rotate = true;
 
-    // flying cubes
+    // sprites for axis labeling
     protected _sprite: gloperate.NdcFillingRectangle;
     protected _spriteProgram: gloperate.Program;
     protected _spriteTextures: gloperate.Texture2[];
@@ -75,7 +74,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this._intermediateFBO.bind();
         this._intermediateFBO.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, false, false);
 
-        // render two flying cubes
+        // render sprites for axis labeling
         this._camera.viewport = [this._frameSize[0], this._frameSize[1]];
         gl.viewport(0, 0, this._frameSize[0], this._frameSize[1]);
 
@@ -213,10 +212,10 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this.loadImages();
 
         // init program
-        const vert = new gloperate.Shader(this.context, gl.VERTEX_SHADER, 'cube.vert');
-        vert.initialize(require('./cube.vert'));
-        const frag = new gloperate.Shader(this.context, gl.FRAGMENT_SHADER, 'cube.frag');
-        frag.initialize(require('./cube.frag'));
+        const vert = new gloperate.Shader(this.context, gl.VERTEX_SHADER, 'sprite.vert');
+        vert.initialize(require('./sprite.vert'));
+        const frag = new gloperate.Shader(this.context, gl.FRAGMENT_SHADER, 'sprite.frag');
+        frag.initialize(require('./sprite.frag'));
 
         this._spriteProgram = new gloperate.Program(this.context);
         this._spriteProgram.initialize([vert, frag]);
@@ -226,7 +225,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this._uModel = this._spriteProgram.uniform('u_model');
         this._uSpriteTexture = this._spriteProgram.uniform('u_spriteTexture');
 
-        // init flying cubes
+        // init sprites for axis labeling
         this._sprite = new gloperate.NdcFillingRectangle(this.context, 'sprite');
         this._sprite.initialize(this._aSpriteVertex);
         const scale = mat4.fromScaling(mat4.create(), vec3.fromValues(0.1, 0.05, 1.0));

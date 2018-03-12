@@ -11,7 +11,7 @@ precision lowp float;
 #endif
 
 
-uniform mat4 u_transform;
+uniform mat4 u_viewProjection;
 uniform vec3 u_eye;
 
 varying vec3 v_uv;
@@ -21,6 +21,6 @@ void main(void)
 {
     v_uv = a_vertex;
 
-    vec4 vertex = u_transform * vec4(a_vertex + u_eye, 1.0);
+    vec4 vertex = u_viewProjection * vec4(a_vertex + u_eye, 1.0);
     gl_Position = vertex.xyww;    
 }

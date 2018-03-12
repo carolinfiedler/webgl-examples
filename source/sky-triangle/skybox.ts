@@ -13,7 +13,7 @@ export class Skybox {
     protected _texture: gloperate.TextureCube;
 
     protected _program: gloperate.Program;
-    protected _uTransform: WebGLUniformLocation;
+    protected _uViewProjection: WebGLUniformLocation;
     protected _uEye: WebGLUniformLocation;
     protected _uBackground: WebGLUniformLocation;
 
@@ -33,7 +33,7 @@ export class Skybox {
         this._program = new gloperate.Program(context);
         this._program.initialize([vert, frag]);
 
-        this._uTransform = this._program.uniform('u_transform');
+        this._uViewProjection = this._program.uniform('u_viewProjection');
         this._uEye = this._program.uniform('u_eye');
         this._uBackground = this._program.uniform('u_background');
 
@@ -43,7 +43,7 @@ export class Skybox {
     }
 
     uninitialize(): void {
-        this._uTransform = -1;
+        this._uViewProjection = -1;
         this._uEye = -1;
         this._uBackground = -1;
 
@@ -61,7 +61,7 @@ export class Skybox {
         gl.depthFunc(gl.LEQUAL);
 
         this._program.bind();
-        gl.uniformMatrix4fv(this._uTransform, gl.GL_FALSE, this._camera.viewProjection);
+        gl.uniformMatrix4fv(this._uViewProjection, gl.GL_FALSE, this._camera.viewProjection);
         gl.uniform3fv(this._uEye, this._camera.eye);
         gl.uniform1i(this._uBackground, 0);
 
