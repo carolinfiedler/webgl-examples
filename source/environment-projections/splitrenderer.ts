@@ -4,7 +4,9 @@ import { mat4, vec3 } from 'gl-matrix';
 import * as gloperate from 'webgl-operate';
 
 import { Cubemap } from './cubemap';
-import { Polarmap } from './polarmap';
+import { Paraboloidmap } from './paraboloidmap';
+
+import { Map } from './map';
 
 
 export class SplitRenderer extends gloperate.AbstractRenderer {
@@ -39,13 +41,15 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
 
     // projections
     protected _cubemap: Cubemap;
-    protected _polarmap: Polarmap;
+    protected _polarmap: Map;
+    protected _spheremap: Map;
+    protected _paraboloidmap: Paraboloidmap;
 
     protected onUpdate(): void {
 
         // update camera angle
         if (this._rotate) {
-            const speed = 0.002;
+            const speed = 0.02;
             const angle = (window.performance.now() * speed) % 360;
             const radians = angle * Math.PI / 180.0;
             this._camera.center = vec3.fromValues(Math.sin(radians), 0.0, Math.cos(radians));
@@ -124,16 +128,19 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         // render split
         gl.enable(gl.SCISSOR_TEST);
         gl.scissor(0, 0, this._frameSize[0] / 4 - 1, this._frameSize[1]);
+        // this._cubemap.frame();
         this._cubemap.frame();
 
         gl.scissor(this._frameSize[0] / 4 + 1, 0, this._frameSize[0] / 4 - 1, this._frameSize[1]);
+        // this._polarmap.frame();
         this._polarmap.frame();
 
         gl.scissor(this._frameSize[0] / 2 + 1, 0, this._frameSize[0] / 4 - 1, this._frameSize[1]);
-        this._polarmap.frame();
+        // this._spheremap.frame();
+        this._paraboloidmap.frame();
 
         gl.scissor(this._frameSize[0] * 3 / 4 + 1, 0, this._frameSize[0] / 4 - 1, this._frameSize[1]);
-        this._polarmap.frame();
+        this._spheremap.frame();
 
         gl.disable(gl.SCISSOR_TEST);
 
@@ -263,8 +270,14 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this._cubemap = new Cubemap();
         this._cubemap.initialize(this.context, this._camera);
 
-        this._polarmap = new Polarmap();
+        this._polarmap = new Map('polar');
         this._polarmap.initialize(this.context, this._camera);
+
+        this._spheremap = new Map('sphere');
+        this._spheremap.initialize(this.context, this._camera);
+
+        this._paraboloidmap = new Paraboloidmap('paraboloid');
+        this._paraboloidmap.initialize(this.context, this._camera);
 
         return true;
     }
@@ -286,6 +299,8 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
 
         this._cubemap.uninitialize();
         this._polarmap.uninitialize();
+        this._spheremap.uninitialize();
+        this._paraboloidmap.uninitialize();
     }
 
 }

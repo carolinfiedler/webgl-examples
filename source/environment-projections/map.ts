@@ -2,7 +2,7 @@
 import * as gloperate from 'webgl-operate';
 
 
-export class Polarmap {
+export class Map {
 
     protected _context: gloperate.Context;
     protected _camera: gloperate.Camera;
@@ -14,6 +14,9 @@ export class Polarmap {
     protected _uInverseViewProjection: WebGLUniformLocation;
     protected _uBackground: WebGLUniformLocation;
 
+    constructor(protected _type: string) {
+    }
+
     protected loadImage(): void {
         const gl = this._context.gl;
 
@@ -22,7 +25,7 @@ export class Polarmap {
         this._texture.initialize(1, 1, internalFormatAndType[0], gl.RGB, internalFormatAndType[1]);
 
         const image = new Image();
-        image.src = 'data/polar.png';
+        image.src = 'data/' + this._type + '.png';
 
         const callback = () => {
             this._texture.resize(image.width, image.height);
@@ -41,8 +44,8 @@ export class Polarmap {
 
         const vert = new gloperate.Shader(this._context, gl.VERTEX_SHADER, 'map.vert');
         vert.initialize(require('./map.vert'));
-        const frag = new gloperate.Shader(this._context, gl.FRAGMENT_SHADER, 'polarmap.frag');
-        frag.initialize(require('./polarmap.frag'));
+        const frag = new gloperate.Shader(this._context, gl.FRAGMENT_SHADER, this._type + 'map.frag');
+        frag.initialize(require('./' + this._type + 'map.frag'));
 
         this._program = new gloperate.Program(this._context);
         this._program.initialize([vert, frag]);
