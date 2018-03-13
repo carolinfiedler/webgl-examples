@@ -4,6 +4,7 @@ import { mat4, vec3 } from 'gl-matrix';
 import * as gloperate from 'webgl-operate';
 
 import { Cubemap } from './cubemap';
+import { Polarmap } from './polarmap';
 
 
 export class SplitRenderer extends gloperate.AbstractRenderer {
@@ -36,10 +37,9 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
     protected _spriteMatrixPz: mat4;
     protected _spriteMatrixNz: mat4;
 
-    // skyBox and skyTriangle use the same cubeMap
-    protected _cubeMapTexture: gloperate.TextureCube;
+    // projections
     protected _cubemap: Cubemap;
-
+    protected _polarmap: Polarmap;
 
     protected onUpdate(): void {
 
@@ -127,13 +127,13 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this._cubemap.frame();
 
         gl.scissor(this._frameSize[0] / 4 + 1, 0, this._frameSize[0] / 4 - 1, this._frameSize[1]);
-        this._cubemap.frame();
+        this._polarmap.frame();
 
         gl.scissor(this._frameSize[0] / 2 + 1, 0, this._frameSize[0] / 4 - 1, this._frameSize[1]);
-        this._cubemap.frame();
+        this._polarmap.frame();
 
         gl.scissor(this._frameSize[0] * 3 / 4 + 1, 0, this._frameSize[0] / 4 - 1, this._frameSize[1]);
-        this._cubemap.frame();
+        this._polarmap.frame();
 
         gl.disable(gl.SCISSOR_TEST);
 
@@ -148,40 +148,6 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
 
     protected loadImages(): void {
         const gl = this.context.gl;
-
-        this._cubeMapTexture = new gloperate.TextureCube(this.context);
-        const internalFormatAndType = gloperate.Wizard.queryInternalTextureFormat(this.context, gl.RGB, 'byte');
-        this._cubeMapTexture.initialize(1, 1, internalFormatAndType[0], gl.RGB, internalFormatAndType[1]);
-
-        const px = new Image();
-        const nx = new Image();
-        const py = new Image();
-        const ny = new Image();
-        const pz = new Image();
-        const nz = new Image();
-
-        px.src = 'data/skybox.px.png';
-        nx.src = 'data/skybox.nx.png';
-        py.src = 'data/skybox.py.png';
-        ny.src = 'data/skybox.ny.png';
-        pz.src = 'data/skybox.pz.png';
-        nz.src = 'data/skybox.nz.png';
-
-        let imagesLoaded = 0;
-        const callback = () => {
-            imagesLoaded++;
-            if (imagesLoaded === 6) {
-                this._cubeMapTexture.resize(px.width, px.height);
-                this._cubeMapTexture.data([px, nx, py, ny, pz, nz]);
-            }
-        };
-
-        px.addEventListener('load', callback);
-        nx.addEventListener('load', callback);
-        py.addEventListener('load', callback);
-        ny.addEventListener('load', callback);
-        pz.addEventListener('load', callback);
-        nz.addEventListener('load', callback);
 
         const images: HTMLImageElement[] =
             [new Image(), new Image(), new Image(), new Image(), new Image(), new Image()];
@@ -293,9 +259,12 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         this._blit.drawBuffer = gl.BACK;
         this._blit.target = this._defaultFBO;
 
-        // init skyTriangle
+        // init projection mappings
         this._cubemap = new Cubemap();
-        this._cubemap.initialize(this.context, this._camera, this._cubeMapTexture);
+        this._cubemap.initialize(this.context, this._camera);
+
+        this._polarmap = new Polarmap();
+        this._polarmap.initialize(this.context, this._camera);
 
         return true;
     }
@@ -316,6 +285,7 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         }
 
         this._cubemap.uninitialize();
+        this._polarmap.uninitialize();
     }
 
 }

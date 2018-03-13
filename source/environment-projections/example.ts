@@ -1,7 +1,6 @@
 
 import * as gloperate from 'webgl-operate';
 
-import { Cubemap } from './cubemap';
 import { SplitRenderer } from './splitrenderer';
 
 
