@@ -11,25 +11,27 @@ precision lowp float;
 #endif
 
 
-uniform sampler2D u_background;
+uniform sampler2D u_backgroundTop;
+uniform sampler2D u_backgroundBottom;
 
 varying vec4 v_ray;
+varying vec2 v_uv;
 
 void main(void)
 {                                     // why necessary?
     vec3 stu = normalize(v_ray.xyz) * vec3(-1.0, 1.0, 1.0);
 
-    const float c_1Over2Pi = 0.1591549430918953357688837633725;
-    const float c_1OverPi  = 0.3183098861837906715377675267450;
-
-    float v = (acos(stu.y) * c_1OverPi);
-    vec2 uv = vec2(atan(stu.x, stu.z) * c_1Over2Pi + 0.5, v);
-
+    stu.y = asin(stu.y) * 2.0 / 3.14159265359;
+    float m = stu.y > 0.0 ? 1.0 + stu.y : 1.0 - stu.y;
+    vec2 uv = 0.5 + 0.5 * vec2(stu.x, stu.z) / m;
+    
 #if __VERSION__ == 100
-    vec3 color = texture2D(u_background, uv).rgb;
+    vec3 colorTop = texture2D(u_backgroundTop, uv).rgb;
+    vec3 colorBottom = texture2D(u_backgroundBottom, uv).rgb;
 #else
-    vec3 color = texture(u_background, uv).rgb;
+    vec3 colorTop = texture(u_backgroundTop, uv).rgb;
+    vec3 colorBottom = texture(u_backgroundBottom, uv).rgb;
 #endif
 
-    fragColor = vec4(color, 1.0);
+    fragColor = stu.y > 0.0 ? vec4(colorTop, 1.0) : vec4(colorBottom, 1.0);
 }

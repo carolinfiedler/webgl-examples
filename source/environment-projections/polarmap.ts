@@ -2,7 +2,7 @@
 import * as gloperate from 'webgl-operate';
 
 
-export class Paraboloidmap {
+export class Polarmap {
 
     protected _context: gloperate.Context;
     protected _camera: gloperate.Camera;
@@ -16,9 +16,6 @@ export class Paraboloidmap {
     protected _uBackgroundTop: WebGLUniformLocation;
     protected _uBackgroundBottom: WebGLUniformLocation;
 
-    constructor(protected _type: string) {
-    }
-
     protected loadImage(): void {
         const gl = this._context.gl;
 
@@ -31,10 +28,10 @@ export class Paraboloidmap {
         this._textureBottom.initialize(1, 1, internalFormatAndTypeBottom[0], gl.RGB, internalFormatAndTypeBottom[1]);
 
         const top = new Image();
-        top.src = 'data/paraboloid.png';
+        top.src = 'data/polar_top.png';
 
         const bottom = new Image();
-        bottom.src = 'data/paraboloid_bottom.png';
+        bottom.src = 'data/polar_bottom.png';
 
         const callbackTop = () => {
             this._textureTop.resize(top.width, top.height);
@@ -59,8 +56,8 @@ export class Paraboloidmap {
 
         const vert = new gloperate.Shader(this._context, gl.VERTEX_SHADER, 'map.vert');
         vert.initialize(require('./map.vert'));
-        const frag = new gloperate.Shader(this._context, gl.FRAGMENT_SHADER, this._type + 'map.frag');
-        frag.initialize(require('./' + this._type + 'map.frag'));
+        const frag = new gloperate.Shader(this._context, gl.FRAGMENT_SHADER, 'polarmap.frag');
+        frag.initialize(require('./' + 'polarmap.frag'));
 
         this._program = new gloperate.Program(this._context);
         this._program.initialize([vert, frag]);
