@@ -2,7 +2,7 @@
 import * as gloperate from 'webgl-operate';
 
 
-export class TestRenderer extends gloperate.AbstractRenderer {
+export class TestRenderer extends gloperate.Renderer {
 
     protected _extensions = false;
     protected _program: gloperate.Program;
@@ -20,8 +20,19 @@ export class TestRenderer extends gloperate.AbstractRenderer {
     protected _depthRenderbuffer: gloperate.Renderbuffer;
     protected _intermediateFBO: gloperate.Framebuffer;
 
+    protected _testNavigation: gloperate.debug.TestNavigation;
 
-    protected onUpdate(): void {
+
+    protected onUpdate(): boolean {
+        this._testNavigation.update();
+
+        const redraw = this._testNavigation.altered;
+        this._testNavigation.reset();
+
+        return redraw;
+    }
+
+    protected onPrepare(): void {
         if (!this._altered.any) {
             return;
         }
@@ -81,8 +92,12 @@ export class TestRenderer extends gloperate.AbstractRenderer {
     }
 
 
-    initialize(context: gloperate.Context, callback: gloperate.Invalidate): boolean {
-        if (!super.initialize(context, callback)) {
+    initialize(context: gloperate.Context, callback: gloperate.Invalidate,
+        mouseEventProvider: gloperate.MouseEventProvider,
+        // keyEventProvider: gloperate.KeyEventProvider,
+        // touchEventProvider: gloperate.TouchEventProvider
+    ): boolean {
+        if (!super.initialize(context, callback, mouseEventProvider)) {
             return false;
         }
         const gl = this.context.gl;
@@ -143,6 +158,10 @@ export class TestRenderer extends gloperate.AbstractRenderer {
         this._blit.drawBuffer = gl.BACK;
         this._blit.target = this._defaultFBO;
 
+        /* Create and configure test navigation. */
+
+        this._testNavigation = new gloperate.debug.TestNavigation(() => this.invalidate(), mouseEventProvider);
+
         return true;
     }
 
@@ -164,3 +183,4 @@ export class TestRenderer extends gloperate.AbstractRenderer {
     }
 
 }
+

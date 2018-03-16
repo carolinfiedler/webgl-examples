@@ -52,5 +52,8 @@
         "2d",
         "3d",
         "examples"
-    ]
+    ],
+    "dependencies": {
+        "webgl-operate": "^0.1.16"
+    }
 }
