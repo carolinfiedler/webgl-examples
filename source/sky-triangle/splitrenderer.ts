@@ -8,7 +8,7 @@ import { Skybox } from './skybox';
 import { SkyTriangle } from './skytriangle';
 
 
-export class SplitRenderer extends gloperate.AbstractRenderer {
+export class SplitRenderer extends gloperate.Renderer {
 
     protected _extensions = false;
 
@@ -44,7 +44,12 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
     protected _skyTriangle: SkyTriangle;
 
 
-    protected onUpdate(): void {
+    protected onUpdate(): boolean {
+
+        return true;
+    }
+
+    protected onPrepare(): void {
 
         // update camera angle
         if (this._rotate) {
@@ -204,8 +209,12 @@ export class SplitRenderer extends gloperate.AbstractRenderer {
         }
     }
 
-    initialize(context: gloperate.Context, callback: gloperate.Invalidate): boolean {
-        if (!super.initialize(context, callback)) {
+    initialize(context: gloperate.Context, callback: gloperate.Invalidate,
+        mouseEventProvider: gloperate.MouseEventProvider,
+        // keyEventProvider: gloperate.KeyEventProvider,
+        // touchEventProvider: gloperate.TouchEventProvider
+    ): boolean {
+        if (!super.initialize(context, callback, mouseEventProvider)) {
             return false;
         }
 

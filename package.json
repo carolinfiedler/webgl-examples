@@ -54,6 +54,6 @@
         "examples"
     ],
     "dependencies": {
-        "webgl-operate": "file:../webgl-operate/webgl-operate-0.1.13.tgz"
+        "webgl-operate": "^0.1.16"
     }
 }
