@@ -9,6 +9,7 @@ module.exports = {
     devtool: 'source-map',
     entry: {
         'sky-triangle': ['require.ts', 'sky-triangle/example.ts'],
+        'camera-navigation': ['require.ts', 'camera-navigation/example.ts'],
         'test-renderer': ['require.ts', 'test-renderer/example.ts']
     },
     externals: {

@@ -1,6 +1,7 @@
 {
     "examples": [
         "test-renderer",
+        "camera-navigation",
         "sky-triangle"
     ]
 }

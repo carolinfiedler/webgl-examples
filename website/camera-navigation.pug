@@ -1,0 +1,17 @@
+extends partial/example.pug
+
+block vars
+  - var title   = 'Camera Navigation'
+  - var author  = 'cgcostume, chistopher, maikz, sbusch42'
+  - var caption = 'ToDo.'
+  - var source  = 'camera-navigation.js'
+
+
+include partial/code.pug
+
+block breakdown
+  section.container
+    h4 Example Breadown
+    p This should describe the example in much more detail, e.g., refering to relevant code snippets and resources
+
+    +code('example-code', 'const example.code.for.breakdown = here;', 'Example code for source break down:')
