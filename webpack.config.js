@@ -10,6 +10,7 @@ module.exports = {
     entry: {
         'environment-projections': ['require.ts', 'environment-projections/example.ts'],
         'sky-triangle': ['require.ts', 'sky-triangle/example.ts'],
+        'camera-navigation': ['require.ts', 'camera-navigation/example.ts'],
         'test-renderer': ['require.ts', 'test-renderer/example.ts']
     },
     externals: {
